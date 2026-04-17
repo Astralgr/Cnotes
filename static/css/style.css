@@ -2923,16 +2923,23 @@ h4 {font-size: 1.1rem;} h5 {font-size: 1rem;} h6 {font-size: 0.9rem;}
     .modal-tab { font-size: 0.75rem; padding: 0.4rem 0.6rem; white-space: nowrap; }
     .inline-form-container { padding: 1rem; max-width: 100%; }
     .activity-row {
-        grid-template-columns: 16px 1fr auto !important;
-        gap: 0.5rem; padding: 0.5rem;
+        display: flex; flex-wrap: wrap; gap: 0.3rem 0.5rem; padding: 0.5rem;
+        font-size: 0.75rem;
     }
-    .activity-note-cell, .activity-arrow { display: none; }
-    .activity-time { font-size: 0.7rem; }
+    .activity-status-dot { flex-shrink: 0; }
+    .activity-customer { font-weight: 600; }
+    .activity-meeting { flex: 1; min-width: 60%; }
+    .activity-note-cell { width: 100%; }
+    .activity-arrow { display: none; }
+    .activity-time { font-size: 0.65rem; margin-left: auto; }
     .customer-row {
-        grid-template-columns: 16px 1fr auto !important;
-        gap: 0.5rem; padding: 0.5rem;
+        display: flex; flex-wrap: wrap; gap: 0.3rem 0.5rem; padding: 0.5rem;
+        font-size: 0.75rem;
     }
-    .customer-website-cell, .customer-address-cell, .customer-industry-badge { display: none; }
+    .customer-name-cell { font-weight: 600; width: 100%; }
+    .customer-website-cell { font-size: 0.7rem; }
+    .customer-address-cell { font-size: 0.7rem; }
+    .customer-industry-badge { font-size: 0.6rem; }
     .upcoming-meeting-row { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
     .upcoming-meeting-meta { flex-wrap: wrap; }
     .meeting-type-pills { flex-wrap: wrap; }
