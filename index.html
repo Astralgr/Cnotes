@@ -1,0 +1,2404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://js.stripe.com/v3/"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+    <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <title>Cnotes</title>
+    <link rel="stylesheet" href="static/css/style.css">
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script>
+    // Custom context menu — replaces browser right-click
+    document.addEventListener('contextmenu', function(e) {
+        var t = e.target;
+        if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable) return;
+        e.preventDefault();
+        var menu = document.getElementById('ctxMenu');
+        if (!menu) return;
+        menu.classList.add('active');
+        // Position near cursor, keep on screen
+        var x = e.clientX, y = e.clientY;
+        menu.style.left = Math.min(x, window.innerWidth - 220) + 'px';
+        menu.style.top = Math.min(y, window.innerHeight - menu.offsetHeight - 10) + 'px';
+    });
+    document.addEventListener('click', function() {
+        var menu = document.getElementById('ctxMenu');
+        if (menu) menu.classList.remove('active');
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            var menu = document.getElementById('ctxMenu');
+            if (menu) menu.classList.remove('active');
+        }
+        if (e.ctrlKey && (e.key === 'u' || e.key === 'U' || e.key === 's' || e.key === 'S')) { e.preventDefault(); }
+        if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j')) { e.preventDefault(); }
+        if (e.key === 'F12') { e.preventDefault(); }
+    });
+    </script>
+</head>
+<body>
+    <div class="app-loader" id="appLoader">
+    <div class="app-loader-logo">Cnotes</div>
+    <div class="app-loader-spinner"></div>
+    <div class="app-loader-text">Loading your data...</div>
+</div>
+
+    <div class="mobile-overlay" id="mobileOverlay" onclick="toggleMobileSidebar()"></div>
+    <aside class="sidebar">
+    <div class="sidebar-logo">Cnotes</div>
+
+    <div>
+        <button class="action-btn btn-home" id="homeBtn" style="margin-bottom: 1rem;">
+                <div class="action-btn-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+                        <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+                        <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+                        <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+                    </svg>
+                </div>
+                <span>Dashboard</span>
+            </button>
+
+            <div class="sidebar-title">Quick Actions</div>
+<button class="action-btn btn-add-customer" id="addCustomerBtn">
+    <div class="action-btn-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="8.5" cy="7" r="4"></circle>
+            <line x1="20" y1="8" x2="20" y2="14"></line>
+            <line x1="23" y1="11" x2="17" y2="11"></line>
+        </svg>
+    </div>
+    <span>Add Customer</span>
+</button>
+
+            <button class="action-btn btn-meeting" id="newMeetingBtn">
+                <div class="action-btn-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                </div>
+                <span>New Meeting</span>
+            </button>
+<button class="action-btn btn-call" id="newCallBtn">
+                <div class="action-btn-icon">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+
+                </svg>
+                </div>
+                <span>New Call</span>
+            </button>
+
+            <button class="action-btn btn-new-task" id="newTaskBtn">
+                <div class="action-btn-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 11l3 3L22 4"></path>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                    </svg>
+                </div>
+                <span>New Task</span>
+            </button>
+            <button class="action-btn btn-new-note" id="newNoteBtn">
+                <div class="action-btn-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 20h9"></path>
+                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                    </svg>
+                </div>
+                <span>Quick Note</span>
+            </button>
+            <button class="action-btn btn-show-tasks" id="showAllTasksBtn">
+                <div class="action-btn-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="8" y1="6" x2="21" y2="6"></line>
+                        <line x1="8" y1="12" x2="21" y2="12"></line>
+                        <line x1="8" y1="18" x2="21" y2="18"></line>
+                        <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                        <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                        <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                    </svg>
+                </div>
+                <span>All Tasks</span>
+            </button>
+
+
+            <!-- ========== SHARING FEATURE - START ========== -->
+            <!-- Can delete this entire button when removing offline testing -->
+            <button class="action-btn btn-shared" id="sharedBtn" style="position: relative;">
+                <div class="action-btn-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                        <polyline points="16 6 12 2 8 6"></polyline>
+                        <line x1="12" y1="2" x2="12" y2="15"></line>
+                    </svg>
+                </div>
+                <span>Shared</span>
+                <span class="notification-badge" id="sharedNotificationBadge" style="display: none;">0</span>
+            </button>
+            <!-- ========== SHARING FEATURE - END ========== -->
+
+                    </div>
+
+            <!-- Separator Line -->
+            <div style="height: 2px; background: linear-gradient(90deg, transparent, var(--primary), transparent); opacity: 0.3; margin: 1rem 0.5rem;"></div>
+
+<div class="sidebar-customers-scroll">
+
+<!-- Customer Slots Progress -->
+<div class="customer-slots-container" id="customerSlotsContainer">
+    <div class="customer-slots-label"><span>CUSTOMER SLOTS</span></div>
+    <div class="customer-slots-bar"><div class="customer-slots-fill normal" id="customerSlotsFill"></div></div>
+    <div class="customer-slots-text"><span id="customerSlotsCount">0 of 6</span><span class="customer-slots-upgrade" onclick="openUpgradeModal()">Upgrade</span></div>
+</div>
+    <!-- Priority Accounts Section -->
+    <div id="priorityAccountsSection" style="display: none;">
+        <div class="priority-section-header">
+            <span class="star-icon"><span class="icon icon-star"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span></span>
+            <span>Priority Accounts</span>
+        </div>
+        <div id="pinnedCustomerFilters"></div>
+        <div class="priority-section-divider"></div>
+    </div>
+
+<!-- Customer Filters Container (hidden but kept for JS compatibility) -->
+<div id="customerFilters" style="display: none;"></div>
+
+
+        
+
+ <!-- User Guide Button - Bottom of Sidebar -->
+        <button class="action-btn btn-guide" onclick="window.open('guide.html', '_blank')" style="
+            display: none;
+            margin-top: auto;
+            padding: 0.5rem 0.6rem;
+            font-size: 0.75rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+            opacity: 0.85;
+            transition: all 0.3s;
+        " onmouseover="this.style.opacity='1'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.5)'" onmouseout="this.style.opacity='0.85'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(102, 126, 234, 0.3)'">
+            <div class="action-btn-icon" style="width: 28px; height: 28px; font-size: 0.85rem;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+            </div>
+            <span style="font-size: 0.8rem;">User Guide</span>
+        </button>
+
+    </aside>
+
+
+
+    <header class="header">
+      <div class="header-content">
+    <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMobileSidebar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    <div style="display: flex; gap: 1rem; align-items: center; flex: 1;">
+        <div class="search-bar">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+            </svg>
+            <input type="text" id="searchInput" placeholder="Search company, industry...">
+        </div>
+        <div class="header-actions">
+ 
+    <!-- Hidden buttons for export/import (triggered from settings) -->
+    <button class="btn-icon" id="exportAllBtn" title="Export All Data" style="display:none;">
+        <svg viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+    </button>
+    <button class="btn-icon" id="importAllBtn" title="Import Data" style="display:none;">
+        <svg viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+        </svg>
+    </button>
+    <!-- Hidden file input for import -->
+    <input type="file" id="importFileInput" accept=".json" style="display: none;">
+    <!-- Hidden meetings button (still needed for JS references) -->
+    <button class="btn-icon" id="viewMeetingsBtn" title="Meetings" style="display:none;">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect></svg>
+    </button>
+            <button class="btn-icon" id="tagsOverviewBtn" title="Tags">
+                <svg viewBox="0 0 24 24">
+                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                    <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                </svg>
+            </button>
+            <button class="btn-icon" id="themeToggle" title="Theme">
+                <svg viewBox="0 0 24 24">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+            </button>
+            <button class="btn-icon" id="archiveBtn" title="Archive">
+                <svg viewBox="0 0 24 24">
+                    <polyline points="21 8 21 21 3 21 3 8"></polyline>
+                    <rect x="1" y="3" width="22" height="5"></rect>
+                    <line x1="10" y1="12" x2="14" y2="12"></line>
+                </svg>
+            </button>
+            <button class="btn-icon danger" id="clearAllBtn" title="Clear All">
+                <svg viewBox="0 0 24 24">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
+            </button>
+        </div>
+    </div>
+    <div id="userAuthArea">
+    <button class="btn-sign-in" id="signInBtn" onclick="openAuthModal()">
+        <svg viewBox="0 0 24 24">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+            <polyline points="10 17 15 12 10 7"></polyline>
+            <line x1="15" y1="12" x2="3" y2="12"></line>
+        </svg>
+        <span>Sign In</span>
+    </button>
+</div>
+</div>
+        </div>
+<div class="customer-header-banner" id="customerHeaderBanner">
+<div class="frozen-banner" id="frozenBanner" style="display:none;"><span>This customer is view-only. Upgrade to edit and add meetings.</span><button onclick="openUpgradeModal()">Upgrade Now</button></div>
+    <div class="customer-banner-top">
+        <div class="customer-header-left">
+            <div class="customer-header-icon"><span class="icon icon-building"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><line x1="8" y1="6" x2="8" y2="6"/><line x1="12" y1="6" x2="12" y2="6"/><line x1="16" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="8" y2="10"/><line x1="12" y1="10" x2="12" y2="10"/><line x1="16" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/></svg></span></div>
+            <div class="customer-header-info">
+                <div class="customer-header-name" id="customerHeaderName"></div>
+            </div>
+        </div>
+        <div class="customer-header-actions">
+    <button class="customer-header-btn" id="bannerPinBtn" onclick="togglePinFromBanner()" title="Pin to Priority">
+        <span id="bannerPinIcon"><span class="icon icon-star-outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span></span>
+    </button>
+    <button class="customer-header-btn" onclick="editCustomerFromBanner()" title="Edit Profile">
+                <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2;">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+            </button>
+            <button class="customer-header-btn delete" onclick="deleteCustomerFromHeader()" title="Delete">
+                <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2;">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+            </button>
+            <button class="customer-header-btn" onclick="showDashboard()" title="Back to All">
+                <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2;">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+    </div>
+    <div class="customer-banner-details" id="customerBannerDetails"></div>
+</div>
+</div>
+    </header>
+
+    <div class="container" id="mainContainer">
+        <div class="main-content">
+<!-- Inline CustomerInfo Form -->
+<div class="inline-form-container" id="inlineCustomerInfoForm">
+    <form id="CustomerInfoForm">
+        <input type="hidden" id="CustomerInfoId">
+        
+        <!-- Sticky Action Bar -->
+        <div class="sticky-action-bar">
+            <div class="sticky-action-bar-title">
+                <span class="icon icon-clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg></span> Customer Info
+            </div>
+            <div class="sticky-action-bar-actions">
+                <button type="button" class="btn btn-secondary btn-large" onclick="closeInlineCustomerInfoForm()">
+                    <span class="icon icon-x"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span> Cancel
+                </button>
+                <button type="submit" class="btn btn-primary btn-large">
+                     Save Customer Info
+                </button>
+            </div>
+        </div>
+
+        <div class="modal-tabs">
+            <button type="button" class="modal-tab active" data-tab="info" data-form="Customer Info"><span class="icon icon-pencil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></span> Info </button>
+            <button type="button" class="modal-tab" data-tab="export" data-form="Customer Info"><span class="icon icon-upload"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span> Export</button>
+        </div>
+
+        <div class="tab-content active" data-tab-content="info">
+            <!-- Customer Selection -->
+            <div class="form-section" style="border-color: var(--primary);">
+                <div class="form-section-header">
+                    <div class="form-section-icon"><span class="icon icon-building"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><line x1="8" y1="6" x2="8" y2="6"/><line x1="12" y1="6" x2="12" y2="6"/><line x1="16" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="8" y2="10"/><line x1="12" y1="10" x2="12" y2="10"/><line x1="16" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/></svg></span></div>
+                    <div class="form-section-title">Customer *</div>
+                </div>
+                <div class="form-section-content">
+                    <div class="customer-combobox">
+                        <input type="text" class="customer-combobox-input" id="CustomerInfoCustomerInput" 
+                               placeholder="Type to search or add new customer..." autocomplete="off" required>
+                        <div class="customer-dropdown" id="CustomerInfoCustomerDropdown"></div>
+                    </div>
+                    <div style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-secondary);">
+                        <span class="icon icon-lightbulb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg></span> Type a name to search existing customers or create a new one
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Background & Context -->
+<div class="form-section"
+     onmouseenter="var i=this.querySelector('.edit-icon'); i.style.width='18px'; i.style.opacity='1'; i.style.marginRight='4px';"
+     onmouseleave="var i=this.querySelector('.edit-icon'); i.style.width='0'; i.style.opacity='0'; i.style.marginRight='0';">
+    <div class="form-section-header" onclick="toggleSection(this)">
+        <div class="form-section-icon"><span class="icon icon-book-open"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span></div>
+        <svg class="edit-icon" viewBox="0 0 24 24"
+             style="width:0; height:16px; stroke:#00CEC8; fill:none; stroke-width:2;
+                    stroke-linecap:round; stroke-linejoin:round; opacity:0;
+                    flex-shrink:0; pointer-events:none; overflow:hidden;
+                    transition: width 0.2s ease, opacity 0.2s ease, margin 0.2s ease;">
+            <path d="M12 20h9"></path>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+        </svg>
+        <div class="form-section-title" contenteditable="true"
+             data-prep-field="title_background"
+             onblur="savePrepTitle(this, 'title_background')"
+             onclick="event.stopPropagation()"
+             onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}"
+             title="Click to rename"
+             style="cursor:text; min-width:50px; flex:1;">Background & Context</div>
+
+        <div class="form-section-toggle">▼</div>
+    </div>
+    <div class="form-section-content">
+        <textarea class="form-textarea" id="CustomerInfoBackground" 
+                  placeholder="Company background, previous interactions, relevant context..."
+                  style="min-height: 100px;"></textarea>
+    </div>
+</div>
+
+
+            <!-- Discussion Points -->
+           <div class="form-section"
+     onmouseenter="var i=this.querySelector('.edit-icon'); i.style.width='18px'; i.style.opacity='1'; i.style.marginRight='4px';"
+     onmouseleave="var i=this.querySelector('.edit-icon'); i.style.width='0'; i.style.opacity='0'; i.style.marginRight='0';">
+    <div class="form-section-header" onclick="toggleSection(this)">
+        <div class="form-section-icon"><span class="icon icon-message"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span></div>
+        <svg class="edit-icon" viewBox="0 0 24 24"
+             style="width:0; height:16px; stroke:#00CEC8; fill:none; stroke-width:2;
+                    stroke-linecap:round; stroke-linejoin:round; opacity:0;
+                    flex-shrink:0; pointer-events:none; overflow:hidden;
+                    transition: width 0.2s ease, opacity 0.2s ease, margin 0.2s ease;">
+            <path d="M12 20h9"></path>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+        </svg>
+<div class="form-section-title" contenteditable="true"
+             data-prep-field="title_discussion"
+             onblur="savePrepTitle(this, 'title_discussion')"
+             onclick="event.stopPropagation()"
+             onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}"
+             title="Click to rename"
+             style="cursor:text; min-width:50px; flex:1;">Discussion Points</div>
+
+        <div class="form-section-toggle">▼</div>
+    </div>
+    <div class="form-section-content">
+        <textarea class="form-textarea" id="CustomerInfoDiscussionPoints" 
+                  placeholder="Key topics to cover...&#10;&#10;• Topic 1&#10;• Topic 2&#10;• Topic 3"
+                  style="min-height: 100px;"></textarea>
+    </div>
+</div>
+
+
+            <!-- Materials Needed -->
+<div class="form-section"
+     onmouseenter="var i=this.querySelector('.edit-icon'); i.style.width='18px'; i.style.opacity='1'; i.style.marginRight='4px';"
+     onmouseleave="var i=this.querySelector('.edit-icon'); i.style.width='0'; i.style.opacity='0'; i.style.marginRight='0';">
+    <div class="form-section-header" onclick="toggleSection(this)">
+        <div class="form-section-icon"><span class="icon icon-package"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></span></div>
+        <svg class="edit-icon" viewBox="0 0 24 24"
+             style="width:0; height:16px; stroke:#00CEC8; fill:none; stroke-width:2;
+                    stroke-linecap:round; stroke-linejoin:round; opacity:0;
+                    flex-shrink:0; pointer-events:none; overflow:hidden;
+                    transition: width 0.2s ease, opacity 0.2s ease, margin 0.2s ease;">
+            <path d="M12 20h9"></path>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+        </svg>
+       <div class="form-section-title" contenteditable="true"
+             data-prep-field="title_materials"
+             onblur="savePrepTitle(this, 'title_materials')"
+             onclick="event.stopPropagation()"
+             onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}"
+             title="Click to rename"
+             style="cursor:text; min-width:50px; flex:1;">Competitive Intelligence</div>
+
+        <div class="form-section-toggle">▼</div>
+    </div>
+    <div class="form-section-content">
+        <textarea class="form-textarea" id="CustomerInfoMaterials" 
+                  placeholder="Key topics to cover...&#10;&#10;• Competitors they're evaluating 1&#10;• Why they're considering switching&#10;• Previous vendors"
+                  style="min-height: 80px;"></textarea>
+    </div>
+</div>
+
+
+            <!-- Expected Outcomes -->
+           <div class="form-section"
+     onmouseenter="var i=this.querySelector('.edit-icon'); i.style.width='18px'; i.style.opacity='1'; i.style.marginRight='4px';"
+     onmouseleave="var i=this.querySelector('.edit-icon'); i.style.width='0'; i.style.opacity='0'; i.style.marginRight='0';">
+    <div class="form-section-header" onclick="toggleSection(this)">
+        <div class="form-section-icon"><span class="icon icon-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span></div>
+        <svg class="edit-icon" viewBox="0 0 24 24"
+             style="width:0; height:16px; stroke:#00CEC8; fill:none; stroke-width:2;
+                    stroke-linecap:round; stroke-linejoin:round; opacity:0;
+                    flex-shrink:0; pointer-events:none; overflow:hidden;
+                    transition: width 0.2s ease, opacity 0.2s ease, margin 0.2s ease;">
+            <path d="M12 20h9"></path>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+        </svg>
+        <div class="form-section-title" contenteditable="true"
+             data-prep-field="title_outcomes"
+             onblur="savePrepTitle(this, 'title_outcomes')"
+             onclick="event.stopPropagation()"
+             onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}"
+             title="Click to rename"
+             style="cursor:text; min-width:50px; flex:1;">Expected Outcomes</div>
+
+        <div class="form-section-toggle">▼</div>
+    </div>
+    <div class="form-section-content">
+        <textarea class="form-textarea" id="CustomerInfoOutcomes" 
+                  placeholder="What success looks like after this meeting..."
+                  style="min-height: 80px;"></textarea>
+    </div>
+</div>
+
+        </div>
+
+        <div class="tab-content" data-tab-content="export">
+            <div class="export-content">
+                <h4 style="margin-bottom: 0.5rem; font-size: 0.9rem;"><span class="icon icon-file-text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span> Export CustomerInfo</h4>
+                <div class="export-preview" id="CustomerInfoExportPreview">Preview...</div>
+                <div class="export-actions">
+                    <button type="button" class="btn-export" id="copyCustomerInfoBtn">Copy</button>
+                    <button type="button" class="btn-export" id="downloadCustomerInfoBtn">Download</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+         <!-- Inline Meeting Form -->
+<div class="inline-form-container" id="inlineMeetingForm">
+    <form id="meetingForm">
+        <input type="hidden" id="meetingId">
+        
+        <!-- Sticky Action Bar -->
+        <div class="sticky-action-bar">
+            <div class="sticky-action-bar-title" id="meetingFormTitle">
+                <span class="icon icon-calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span> Meeting Notes
+            </div>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+<label style="display: none; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.85rem; white-space: nowrap;" id="markCompletedWrapper">
+    <input type="checkbox" id="meetingMarkCompleted" style="width: auto; cursor: pointer;">
+    <span><span class="icon icon-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span> Mark as completed</span>
+</label>
+                <div class="sticky-action-bar-actions">
+                    <button type="button" class="btn btn-secondary btn-large" onclick="closeInlineMeetingForm()">
+                        <span class="icon icon-x"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-large">
+                        Save Meeting
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-tabs">
+            <button type="button" class="modal-tab active" data-tab="info" data-form="meeting">
+                <span class="icon icon-info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span> Info
+            </button>
+            <button type="button" class="modal-tab" data-tab="CustomerInfo" data-form="meeting" id="CustomerInfoTab" style="display: none;">
+                <span class="icon icon-clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg></span> Prep
+            </button>
+            <button type="button" class="modal-tab" data-tab="notes" data-form="meeting">
+                <span class="icon icon-edit-3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span> Notes
+            </button>
+            <button type="button" class="modal-tab" data-tab="meddpicc" data-form="meeting">
+                <span class="icon icon-target"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span> MEDDPICC
+            </button>
+            <button type="button" class="modal-tab" data-tab="actions" data-form="meeting">
+                <span class="icon icon-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span> Actions
+            </button>
+            <button type="button" class="modal-tab" data-tab="export" data-form="meeting">
+                <span class="icon icon-upload"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span> Export
+            </button>
+        </div>
+
+        <!-- INFO TAB -->
+        <div class="tab-content active" data-tab-content="info">
+            <!-- Customer -->
+            <div class="form-section" style="border-color: var(--primary);">
+                <div class="form-section-header">
+                    <div class="form-section-icon"><span class="icon icon-building"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><line x1="8" y1="6" x2="8" y2="6"/><line x1="12" y1="6" x2="12" y2="6"/><line x1="16" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="8" y2="10"/><line x1="12" y1="10" x2="12" y2="10"/><line x1="16" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/></svg></span></div>
+                    <div class="form-section-title">Customer *</div>
+                </div>
+                <div class="form-section-content">
+                    <div class="customer-combobox">
+                        <input type="text" class="customer-combobox-input" id="meetingCustomerInput" 
+       placeholder="Type to search or add new customer..." autocomplete="off">
+                        <div class="customer-dropdown" id="customerDropdown"></div>
+                    </div>
+                    <div style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-secondary);">
+                        <span class="icon icon-lightbulb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg></span> Type a name to search existing customers or create a new one
+                    </div>
+                </div>
+            </div>
+
+            <!-- Meeting Details -->
+            <div class="form-section">
+                <div class="form-section-header">
+                    <div class="form-section-icon"><span class="icon icon-clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg></span></div>
+                    <div class="form-section-title">Meeting Details</div>
+                </div>
+                <div class="form-section-content">
+                    <div class="form-group">
+                        <label class="form-label">Title *</label>
+                        <input type="text" class="form-input" id="meetingTitle" placeholder="e.g., Q4 Business Review">
+                    </div>
+                    
+                   <div class="form-row">
+    <div class="form-group">
+        <label class="form-label">Date & Time * <span style="font-size: 0.7rem; font-weight: 400; color: var(--text-secondary);">(DD/MM/YYYY)</span></label>
+        <input type="datetime-local" class="form-input" id="meetingDate" required>
+    </div>
+    <div class="form-group">
+        <label class="form-label">Duration (min)</label>
+        <input type="number" class="form-input" id="meetingDuration" placeholder="60" min="1">
+    </div>
+</div>
+<div class="form-group">
+    <label class="form-label">Conference Link <span style="font-weight: 400; color: var(--text-secondary);">(optional)</span></label>
+    <div style="position: relative;">
+        <input type="url" class="form-input" id="meetingConferenceLink" placeholder="https://zoom.us/j/... or https://meet.google.com/..." style="padding-left: 2.5rem;">
+        <span style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); font-size: 1.1rem;"><span class="icon icon-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span></span>
+    </div>
+    <div style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-secondary);">
+        <span class="icon icon-lightbulb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg></span> Zoom, Google Meet, Teams, or any video call link
+    </div>
+</div>
+                    <div class="form-group">
+                        <label class="form-label">Meeting Type *</label>
+                       <div class="meeting-type-pills" id="meetingTypePills">
+    <div class="meeting-type-pill" onclick="selectMeetingType('discovery')">
+        <span class="meeting-type-icon"><span class="icon icon-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span></span>
+        <span>Discovery</span>
+    </div>
+    <div class="meeting-type-pill" onclick="selectMeetingType('follow-up')">
+        <span class="meeting-type-icon"><span class="icon icon-phone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span></span>
+        <span>Follow-up</span>
+    </div>
+    <button type="button" class="meeting-type-pill" onclick="addCustomMeetingType()" style="border: none; background: linear-gradient(135deg, #023747 0%, #1ba8af 100%); color: white;">
+        <span class="meeting-type-icon"><span class="icon icon-plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span></span>
+        <span>Add Type</span>
+    </button>
+</div>
+                        <input type="hidden" id="meetingType" value="other">
+
+                    </div>
+                </div>
+            </div>
+
+                       <!-- Participants -->
+            <div class="form-section">
+                <div class="form-section-header" onclick="toggleSection(this)">
+                    <div class="form-section-icon"><span class="icon icon-users"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span></div>
+                    <div class="form-section-title">Participants</div>
+                    <div class="form-section-toggle">▼</div>
+                </div>
+                <div class="form-section-content">
+                    <!-- Quick Add from Existing Contacts -->
+                    <div class="quick-add-contacts" id="quickAddContactsContainer">
+                        <div class="quick-add-contacts-title">
+                            <span><span class="icon icon-zap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span></span>
+                            <span>Quick Add from Contacts</span>
+                        </div>
+                        <div class="quick-add-contacts-list" id="quickAddContactsList"></div>
+                    </div>
+                    
+                    <div class="form-row" style="margin-bottom: 0.75rem;">
+                        <input type="text" class="form-input" id="participantNameInput" placeholder="Name *">
+                        <input type="text" class="form-input" id="participantRoleInput" placeholder="Role">
+                    </div>
+<div class="form-row" style="margin-bottom: 0.75rem;">
+    <input type="text" class="form-input" id="participantEmailInput" placeholder="Email(s) - comma separated">
+    <input type="text" class="form-input" id="participantPhoneInput" placeholder="Phone(s) - comma separated">
+</div>
+                    <button type="button" class="btn btn-primary" id="addParticipantBtn" style="width: 100%; margin-bottom: 1rem;">
+                        + Add Participant
+                    </button>
+                    <div class="participant-grid" id="participantsList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CUSTOMERINFO TAB -->
+        <div class="tab-content" data-tab-content="CustomerInfo">
+            <div id="CustomerInfoContent" style="background: var(--bg-secondary); padding: 0.75rem; border-radius: 8px;">
+                <p style="color: var(--text-secondary); text-align: center; font-size: 0.8rem;">No CustomerInfo</p>
+            </div>
+        </div>
+
+        <!-- NOTES TAB -->
+        <div class="tab-content" data-tab-content="notes">
+
+
+            <div class="form-group">
+                <label class="form-label">Meeting Notes *</label>
+                <div class="enhanced-editor-wrapper">
+                    <div class="enhanced-editor-toolbar">
+                        <div class="toolbar-group">
+                            <button type="button" class="rich-text-btn" data-command="bold" title="Bold">
+                                <svg viewBox="0 0 24 24"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path></svg>
+                            </button>
+                            <button type="button" class="rich-text-btn" data-command="italic" title="Italic">
+                                <svg viewBox="0 0 24 24"><line x1="19" y1="4" x2="10" y2="4"></line><line x1="14" y1="20" x2="5" y2="20"></line><line x1="15" y1="4" x2="9" y2="20"></line></svg>
+                            </button>
+                            <button type="button" class="rich-text-btn" data-command="underline" title="Underline">
+                                <svg viewBox="0 0 24 24"><path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"></path><line x1="4" y1="21" x2="20" y2="21"></line></svg>
+                            </button>
+                        </div>
+                        <div class="toolbar-group">
+                            <button type="button" class="rich-text-btn" data-command="insertUnorderedList" title="Bullet List">
+                                <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                            </button>
+                            <button type="button" class="rich-text-btn" data-command="insertOrderedList" title="Numbered List">
+                                <svg viewBox="0 0 24 24"><line x1="10" y1="6" x2="21" y2="6"></line><line x1="10" y1="12" x2="21" y2="12"></line><line x1="10" y1="18" x2="21" y2="18"></line><path d="M4 6h1v4"></path><path d="M4 10h2"></path><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"></path></svg>
+                            </button>
+                        </div>
+                        <!-- ========== AI BUTTON FOR NOTES - START ========== -->
+                        <!-- <span class="icon icon-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span> KEEP THIS - Works for both local and Firebase -->
+                        <div class="toolbar-group" style="border-left: 2px solid var(--primary); padding-left: 0.5rem;">
+                            <button type="button" class="rich-text-btn ai-btn" onclick="aiImproveText('meetingNotesEditor')" title="AI Improve Text">
+                                <span style="font-size: 1.1rem;"><span class="icon icon-sparkles"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.912 5.813L20 10l-6.088 1.187L12 17l-1.912-5.813L4 10l6.088-1.187L12 3z"/><path d="M19 15l.75 2.25L22 18l-2.25.75L19 21l-.75-2.25L16 18l2.25-.75L19 15z"/></svg></span></span>
+                                <span style="font-size: 0.7rem; font-weight: 600;">AI Improve</span>
+                            </button>
+                        </div>
+                        <!-- ========== AI BUTTON FOR NOTES - END ========== -->
+                    </div>
+                    <div class="rich-text-editor enhanced-editor-content" id="meetingNotesEditor" contenteditable="true" data-placeholder="Start typing your notes..."></div>
+                </div>
+                <div class="meddpicc-toolbar">
+                    <div class="meddpicc-toolbar-label">
+                        <span class="icon icon-sparkles"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.912 5.813L20 10l-6.088 1.187L12 17l-1.912-5.813L4 10l6.088-1.187L12 3z"/><path d="M19 15l.75 2.25L22 18l-2.25.75L19 21l-.75-2.25L16 18l2.25-.75L19 15z"/></svg></span> Select text and quick add to MEDDPICC:
+                    </div>
+                    <div class="meddpicc-toolbar-buttons">
+                        <button type="button" class="meddpicc-quick-btn" data-field="metrics"><span><span class="icon icon-dollar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span></span><span>Metrics</span></button>
+                        <button type="button" class="meddpicc-quick-btn" data-field="economicBuyer"><span><span class="icon icon-briefcase"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span></span><span>Buyer</span></button>
+                        <button type="button" class="meddpicc-quick-btn" data-field="decisionCriteria"><span><span class="icon icon-clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg></span></span><span>Criteria</span></button>
+                        <button type="button" class="meddpicc-quick-btn" data-field="decisionProcess"><span><span class="icon icon-refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></span></span><span>Process</span></button>
+                        <button type="button" class="meddpicc-quick-btn" data-field="paperProcess"><span><span class="icon icon-file-text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span></span><span>Paper</span></button>
+                        <button type="button" class="meddpicc-quick-btn" data-field="pain"><span><span class="icon icon-frown"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></span></span><span>Pain</span></button>
+                        <button type="button" class="meddpicc-quick-btn" data-field="champion"><span><span class="icon icon-handshake"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 0C1.46 6.7 1.33 10.28 4 13l8 8 8-8c2.67-2.72 2.54-6.3.42-8.42z"/></svg></span></span><span>Champion</span></button>
+                        <button type="button" class="meddpicc-quick-btn" data-field="competition"><span><span class="icon icon-swords"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 19l6-6"/><path d="M16 16l4 4"/><path d="M19 21l2-2"/><path d="M14.5 6.5L20 12"/><path d="M18 3h3v3"/><path d="M3 21l9-9"/></svg></span></span><span>Comp</span></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Next Steps</label>
+                <div class="enhanced-editor-wrapper">
+                    <div class="enhanced-editor-toolbar">
+                        <div class="toolbar-group">
+                            <button type="button" class="rich-text-btn" data-command="bold" data-target="nextSteps" title="Bold">
+                                <svg viewBox="0 0 24 24"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path></svg>
+                            </button>
+                            <button type="button" class="rich-text-btn" data-command="insertUnorderedList" data-target="nextSteps" title="Bullet List">
+                                <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line></svg>
+                            </button>
+                        </div>
+ <!-- ========== AI BUTTON FOR NEXT STEPS - START ========== -->
+                        <!-- <span class="icon icon-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span> KEEP THIS - Works for both local and Firebase -->
+                        <div class="toolbar-group" style="border-left: 2px solid var(--primary); padding-left: 0.5rem;">
+                            <button type="button" class="rich-text-btn ai-btn" onclick="aiImproveText('meetingNextStepsEditor')" title="AI Improve Text">
+                                <span style="font-size: 1.1rem;"><span class="icon icon-sparkles"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.912 5.813L20 10l-6.088 1.187L12 17l-1.912-5.813L4 10l6.088-1.187L12 3z"/><path d="M19 15l.75 2.25L22 18l-2.25.75L19 21l-.75-2.25L16 18l2.25-.75L19 15z"/></svg></span></span>
+                                <span style="font-size: 0.7rem; font-weight: 600;">AI Improve</span>
+                            </button>
+                        </div>
+                        <!-- ========== AI BUTTON FOR NEXT STEPS - END ========== -->
+
+                    </div>
+                    <div class="rich-text-editor enhanced-editor-content" id="meetingNextStepsEditor" contenteditable="true" data-placeholder="What are the next steps?"></div>
+                </div>
+                <div class="action-item-toolbar">
+                    <div class="action-item-toolbar-label"><span class="icon icon-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span> Select text and quick add action:</div>
+                    <div class="action-item-toolbar-buttons">
+                        <button type="button" class="action-item-quick-btn">
+                            <svg viewBox="0 0 24 24" style="width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2;">
+                                <line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            <span>Add Task</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Tags</label>
+                <input type="text" class="form-input" id="meetingTags" placeholder="renewal, upsell, expansion">
+            </div>
+        </div>
+
+        <!-- MEDDPICC TAB -->
+        <div class="tab-content" data-tab-content="meddpicc">
+            <!-- Visual Tracker -->
+            <div class="meddpicc-visual-tracker" id="meddpiccVisualTracker">
+                <div class="meddpicc-tracker-item" onclick="focusMeddpiccField('Metrics')">
+                    <div class="meddpicc-tracker-icon"><span class="icon icon-dollar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span></div>
+                    <div class="meddpicc-tracker-label">Metrics</div>
+                </div>
+                <div class="meddpicc-tracker-item" onclick="focusMeddpiccField('EconomicBuyer')">
+                    <div class="meddpicc-tracker-icon"><span class="icon icon-briefcase"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span></div>
+                    <div class="meddpicc-tracker-label">Buyer</div>
+                </div>
+                <div class="meddpicc-tracker-item" onclick="focusMeddpiccField('DecisionCriteria')">
+                    <div class="meddpicc-tracker-icon"><span class="icon icon-clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg></span></div>
+                    <div class="meddpicc-tracker-label">Criteria</div>
+                </div>
+                <div class="meddpicc-tracker-item" onclick="focusMeddpiccField('DecisionProcess')">
+                    <div class="meddpicc-tracker-icon"><span class="icon icon-refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></span></div>
+                    <div class="meddpicc-tracker-label">Process</div>
+                </div>
+                <div class="meddpicc-tracker-item" onclick="focusMeddpiccField('PaperProcess')">
+                    <div class="meddpicc-tracker-icon"><span class="icon icon-file-text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span></div>
+                    <div class="meddpicc-tracker-label">Paper</div>
+                </div>
+                <div class="meddpicc-tracker-item" onclick="focusMeddpiccField('Pain')">
+                    <div class="meddpicc-tracker-icon"><span class="icon icon-frown"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></span></div>
+                    <div class="meddpicc-tracker-label">Pain</div>
+                </div>
+                <div class="meddpicc-tracker-item" onclick="focusMeddpiccField('Champion')">
+                    <div class="meddpicc-tracker-icon"><span class="icon icon-handshake"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 0C1.46 6.7 1.33 10.28 4 13l8 8 8-8c2.67-2.72 2.54-6.3.42-8.42z"/></svg></span></div>
+                    <div class="meddpicc-tracker-label">Champion</div>
+                </div>
+                <div class="meddpicc-tracker-item" onclick="focusMeddpiccField('Competition')">
+                    <div class="meddpicc-tracker-icon"><span class="icon icon-swords"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 19l6-6"/><path d="M16 16l4 4"/><path d="M19 21l2-2"/><path d="M14.5 6.5L20 12"/><path d="M18 3h3v3"/><path d="M3 21l9-9"/></svg></span></div>
+                    <div class="meddpicc-tracker-label">Comp</div>
+                </div>
+            </div>
+
+            <div class="meddpicc-form-grid">
+                <div class="form-group">
+                    <label class="form-label"><span class="icon icon-dollar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span> Metrics</label>
+                    <textarea class="form-textarea" id="meddpiccMetrics" placeholder="ROI, cost savings, efficiency gains..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label"><span class="icon icon-briefcase"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span> Economic Buyer</label>
+                    <input type="text" class="form-input" id="meddpiccEconomicBuyer" placeholder="Name & Title">
+                </div>
+                <div class="form-group">
+                    <label class="form-label"><span class="icon icon-clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg></span> Decision Criteria</label>
+                    <textarea class="form-textarea" id="meddpiccDecisionCriteria" placeholder="Technical & business requirements..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label"><span class="icon icon-refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></span> Decision Process</label>
+                    <textarea class="form-textarea" id="meddpiccDecisionProcess" placeholder="Steps, stakeholders, timeline..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label"><span class="icon icon-file-text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span> Paper Process</label>
+                    <textarea class="form-textarea" id="meddpiccPaperProcess" placeholder="Legal, procurement, approvals..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label"><span class="icon icon-frown"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></span> Pain</label>
+                    <textarea class="form-textarea" id="meddpiccPain" placeholder="Problems they need to solve..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label"><span class="icon icon-handshake"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 0C1.46 6.7 1.33 10.28 4 13l8 8 8-8c2.67-2.72 2.54-6.3.42-8.42z"/></svg></span> Champion</label>
+                    <input type="text" class="form-input" id="meddpiccChampion" placeholder="Name & Title">
+                </div>
+                <div class="form-group">
+                    <label class="form-label"><span class="icon icon-swords"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 19l6-6"/><path d="M16 16l4 4"/><path d="M19 21l2-2"/><path d="M14.5 6.5L20 12"/><path d="M18 3h3v3"/><path d="M3 21l9-9"/></svg></span> Competition</label>
+                    <textarea class="form-textarea" id="meddpiccCompetition" placeholder="Other vendors, alternatives..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- ACTIONS TAB -->
+        <div class="tab-content" data-tab-content="actions">
+            <div class="form-group">
+                <label class="form-label">Action Items</label>
+                <div style="display: flex; gap: 0.35rem; margin-bottom: 0.35rem;">
+                    <input type="text" class="form-input" id="quickTaskInput" placeholder="Add task...">
+                    <button type="button" class="btn btn-primary" id="addQuickTaskBtn">+</button>
+                </div>
+                <div class="meeting-tasks-list" id="meetingTasksList"></div>
+            </div>
+        </div>
+
+        <!-- EXPORT TAB -->
+        <div class="tab-content" data-tab-content="export">
+            <div class="export-content">
+                <h4 style="margin-bottom: 0.5rem; font-size: 0.9rem;"><span class="icon icon-file-text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span> Export Meeting Notes</h4>
+                <div class="export-preview" id="meetingExportPreview">Preview...</div>
+                <div class="export-actions">
+                    <button type="button" class="btn-export" id="copyMeetingBtn">Copy</button>
+                    <button type="button" class="btn-export" id="downloadMeetingBtn">Download</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<!-- Placeholder for future dashboard content -->
+<div class="dashboard-placeholder-section" id="dashboardPlaceholder" style="display: none;">
+    <div style="background: var(--bg-primary); border-radius: 12px; padding: 2rem; text-align: center; box-shadow: 0 1px 4px var(--shadow);">
+        <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"><span class="icon icon-bar-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg></span></div>
+        <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem; color: var(--text-primary);">Dashboard Content Area</h3>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">Future dashboard widgets and content will appear here</p>
+    </div>
+</div>
+
+<!-- ========== SHARING FEATURE SECTION - START ========== -->
+<!-- Can delete this entire section when removing offline testing -->
+<div class="shared-meetings-section" id="sharedMeetingsSection">
+    <div class="section-header">
+        <h2 class="section-title"><span class="icon icon-upload"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span> Shared Meetings</h2>
+    </div>
+    
+    <div class="shared-filter-bar">
+        <select class="shared-filter-select" id="sharedViewFilter" onchange="renderSharedMeetings()">
+            <option value="with-me">Shared with Me</option>
+            <option value="by-me">Shared by Me</option>
+            <option value="all">All Shared</option>
+        </select>
+        
+        <div class="shared-status-filter">
+            <button class="shared-status-btn active" data-status="all" onclick="filterSharedByStatus('all')">All</button>
+            <button class="shared-status-btn" data-status="pending" onclick="filterSharedByStatus('pending')">Pending</button>
+            <button class="shared-status-btn" data-status="accepted" onclick="filterSharedByStatus('accepted')">Accepted</button>
+        </div>
+        
+        <input type="text" class="form-input" id="sharedSearchInput" placeholder="<span class="icon icon-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span> Search..." 
+               style="max-width: 200px; margin-left: auto;" oninput="renderSharedMeetings()">
+    </div>
+    
+    <div class="shared-meetings-grid" id="sharedMeetingsGrid">
+        <!-- Populated by JS -->
+    </div>
+    
+    <div class="empty-state" id="sharedMeetingsEmpty" style="display: none;">
+        <div class="empty-state-icon"><span class="icon icon-upload"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span></div>
+        <div>No shared meetings</div>
+    </div>
+</div>
+<!-- ========== SHARING FEATURE SECTION - END ========== -->
+
+<!-- Upcoming Meetings Section -->
+<div class="upcoming-meetings-section" id="upcomingMeetingsSection">
+    <div class="upcoming-meetings-header">
+    <h2 class="upcoming-meetings-title">
+        <span></span>
+        <span>Upcoming Meetings</span>
+    </h2>
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <button class="btn-schedule-meeting" id="upcomingHeaderBtn" onclick="openInlineMeetingFormForUpcoming()">
+            <span>+</span>
+            <span>Upcoming Meeting</span>
+        </button>
+<button class="btn-schedule-meeting" id="upcomingFollowUpBtn" onclick="openFollowUpModal('upcoming')" style="display: none;">
+    <span>+</span>
+    <span>Follow-Up</span>
+</button>
+        <div class="upcoming-meetings-filters">
+            <button class="upcoming-filter-btn active" data-period="all">All</button>
+            <button class="upcoming-filter-btn" data-period="7">Week</button>
+            <button class="upcoming-filter-btn" data-period="30">Month</button>
+        </div>
+    </div>
+    </div>
+    <div class="upcoming-meetings-list" id="upcomingMeetingsList"></div>
+    <div class="upcoming-meetings-empty" id="upcomingMeetingsEmpty" style="display: none;">
+        <div class="upcoming-empty-icon"><span class="icon icon-calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span></div>
+        <div class="upcoming-empty-text">No upcoming meetings scheduled</div>
+        <button class="btn-schedule-meeting" onclick="openInlineMeetingFormForUpcoming()">
+            <span>+</span>
+            <span>Upcoming Meeting</span>
+        </button>
+    </div>
+</div>
+
+<!-- Customer Activity Tracker -->
+<div class="customer-activity-section" id="customerActivitySection">
+   <div class="section-header">
+    <h2 class="section-title">Customer Activity</h2>
+    <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+        <input type="text" class="form-input" id="activitySearchInput" placeholder="Search..." 
+               style="width: 200px; padding: 0.35rem 0.75rem; font-size: 0.8rem;"
+               oninput="renderCustomerActivity()">
+        <button class="fullscreen-btn" id="activityFullscreenBtn" onclick="toggleSectionFullscreen('customerActivitySection', 'activityFullscreenBtn')"><span class="icon icon-maximize"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></span> Expand</button>
+        <button class="filter-btn active" data-activity-filter="all" onclick="filterCustomerActivity('all')">All</button>
+        <button class="filter-btn" data-activity-filter="week" onclick="filterCustomerActivity('week')">Week</button>
+        <button class="filter-btn" data-activity-filter="month" onclick="filterCustomerActivity('month')">Month</button>
+        <button class="filter-btn" data-activity-filter="custom" onclick="showCustomDateRange()">Custom</button>
+    </div>
+</div>
+    <div id="customDateRangeInputs" style="display: none; margin-bottom: 1rem; padding: 0.75rem; background: var(--bg-secondary); border-radius: 8px;">
+        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+            <label style="font-size: 0.8rem; font-weight: 600;">From:</label>
+            <div style="position: relative;">
+                <input type="text" id="activityStartDateDisplay" class="form-input" style="width: 150px; cursor: pointer;" placeholder="DD/MM/YYYY" readonly onclick="document.getElementById('activityStartDatePicker').showPicker()">
+                <input type="date" id="activityStartDatePicker" style="position: absolute; opacity: 0; pointer-events: none;" onchange="updateActivityDateDisplay('start')">
+            </div>
+            <label style="font-size: 0.8rem; font-weight: 600;">To:</label>
+            <div style="position: relative;">
+                <input type="text" id="activityEndDateDisplay" class="form-input" style="width: 150px; cursor: pointer;" placeholder="DD/MM/YYYY" readonly onclick="document.getElementById('activityEndDatePicker').showPicker()">
+                <input type="date" id="activityEndDatePicker" style="position: absolute; opacity: 0; pointer-events: none;" onchange="updateActivityDateDisplay('end')">
+            </div>
+            <button class="btn btn-primary" onclick="applyCustomDateRange()" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">Apply</button>
+        </div>
+    </div>
+    <div class="activity-list" id="customerActivityGrid"></div>
+    <div class="empty-state" id="customerActivityEmpty" style="display: none;">
+        <div class="empty-state-icon"><span class="icon icon-calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span></div>
+        <div>No customer meetings yet</div>
+    </div>
+</div>
+ <div class="customer-CustomerInfos-section" id="customerCustomerInfosSection">
+    <div class="customer-section-header" onclick="toggleCustomerSection('customerCustomerInfosSection')">
+        <h3 class="customer-section-title">Info</h3>
+        <div class="customer-section-toggle">▼</div>
+    </div>
+                <div id="customerCustomerInfosList"></div>
+                <div class="empty-state" id="customerCustomerInfosEmpty" style="display: none;"></div>
+            </div>
+
+<!-- All Customers Section -->
+<div class="all-customers-section" id="allCustomersSection">
+    <div class="section-header">
+        <h2 class="section-title">All Customers (<span id="allCustomersTotal">0</span>)</h2>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+<input type="text" class="form-input" id="customersSearchInput" placeholder="Search..." style="width: 200px; padding: 0.35rem 0.75rem; font-size: 0.8rem;" oninput="renderAllCustomersList()">
+<button class="fullscreen-btn" id="customersFullscreenBtn" onclick="toggleSectionFullscreen('allCustomersSection', 'customersFullscreenBtn')"><span class="icon icon-maximize"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></span> Expand</button>
+            <button class="filter-btn active" data-customers-filter="all" onclick="filterCustomersList('all')">All</button>
+            <button class="filter-btn" data-customers-filter="pinned" onclick="filterCustomersList('pinned')"><span class="icon icon-star"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span> Pinned</button>
+            <button class="filter-btn" data-customers-filter="recent" onclick="filterCustomersList('recent')">Recent</button>
+            <button class="btn-schedule-meeting" onclick="openAddCustomerForm()">+ Add</button>
+        </div>
+    </div>
+    <div class="customers-list" id="allCustomersList">
+        <div class="activity-header-row" style="grid-template-columns: 20px 1.5fr 1fr 1.5fr 0.8fr 40px;">
+            <div class="activity-header-cell"></div>
+            <div class="activity-header-cell">Company</div>
+            <div class="activity-header-cell">Website</div>
+            <div class="activity-header-cell">Address</div>
+            <div class="activity-header-cell">Industry</div>
+            <div class="activity-header-cell"></div>
+        </div>
+        <div id="customersListContent"></div>
+    </div>
+    <div class="empty-state" id="allCustomersEmpty" style="display: none;">
+        <div class="empty-state-icon"><span class="icon icon-users"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span></div>
+        <div>No customers yet</div>
+        <button class="btn-schedule-meeting" onclick="openAddCustomerForm()" style="margin-top: 0.5rem;">+ Add First Customer</button>
+    </div>
+</div>
+
+
+
+<!-- Customer Participants Section -->
+<div class="customer-participants-section" id="customerParticipantsSection">
+    <div class="customer-section-header" onclick="toggleCustomerSection('customerParticipantsSection')">
+        <h3 class="customer-section-title">Contacts </h3>
+        <div class="customer-section-toggle">▼</div>
+    </div>
+    <div class="participants-overview-grid" id="customerParticipantsGrid"></div>
+    <div class="empty-state-compact" id="customerParticipantsEmpty" style="display: none;">
+        <div class="empty-state-compact-icon"><span class="icon icon-users"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span></div>
+        <div>No participants recorded yet</div>
+    </div>
+</div>
+
+   <div class="customer-meetings-section" id="customerMeetingsSection">
+    <div class="customer-section-header" onclick="toggleCustomerSection('customerMeetingsSection')">
+    <h3 class="customer-section-title">Meetings</h3>
+    <div class="customer-section-toggle">▼</div>
+</div>
+                <div id="customerMeetingsList"></div>
+                <div class="empty-state" id="customerMeetingsEmpty" style="display: none;"></div>
+            </div>
+
+            <div class="tasks-section">
+    <div class="section-header">
+        <h2 class="section-title" id="mainSectionTitle">Tasks</h2>
+        <div class="view-toggle">
+            <button class="btn-add-meeting" onclick="openTaskModal()" style="margin-right: 0.5rem;">+ Task</button>
+
+            <button class="view-btn" data-view="list"><span class="icon icon-clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg></span></button>
+            <button class="view-btn" data-view="kanban"><span class="icon icon-bar-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg></span></button>
+            <button class="view-btn active" data-view="active">Active</button>
+            <button class="view-btn" data-view="archived">Archive</button>
+        </div>
+    </div>
+
+                <div class="task-filters" id="taskFilters">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="today">Today</button>
+                    <button class="filter-btn" data-filter="week">Week</button>
+                    <button class="filter-btn" data-filter="overdue">Overdue</button>
+                    <button class="filter-btn" data-filter="high">High</button>
+                </div>
+
+                <div class="tasks-list" id="tasksList"></div>
+
+                <div class="kanban-board" id="kanbanBoard">
+                    <div class="kanban-column">
+                        <div class="kanban-column-header">
+                            <div class="kanban-column-title"><span class="icon icon-edit-3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span> To Do</div>
+                            <div class="kanban-column-count" id="todoCount">0</div>
+                        </div>
+                        <div class="kanban-cards" id="todoColumn" data-status="todo"></div>
+                    </div>
+                    <div class="kanban-column">
+                        <div class="kanban-column-header">
+                            <div class="kanban-column-title"><span class="icon icon-rocket"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg></span> Progress</div>
+                            <div class="kanban-column-count" id="progressCount">0</div>
+                        </div>
+                        <div class="kanban-cards" id="progressColumn" data-status="in-progress"></div>
+                    </div>
+                    <div class="kanban-column">
+                        <div class="kanban-column-header">
+                            <div class="kanban-column-title"><span class="icon icon-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span> Completed</div>
+                            <div class="kanban-column-count" id="doneCount">0</div>
+                        </div>
+                        <div class="kanban-cards" id="doneColumn" data-status="done"></div>
+                    </div>
+                </div>
+
+                <div class="empty-state" id="tasksEmpty" style="display: none;"></div>
+            </div>
+        </div>
+
+<div class="notes-container" id="notesContainer">
+    <!-- Sidebar Collapse Button -->
+    <button class="sidebar-collapse-btn" onclick="toggleSidebarCollapse()" title="Collapse/Expand">
+        →
+    </button>
+    
+    <!-- Timeline Section (Customer View Only) -->
+    <div class="timeline-section" id="timelineSection" style="display: none;">
+        <div class="section-header-simple">
+            <h2 class="section-title" style="font-size: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                
+                <span>Timeline</span>
+            </h2>
+        </div>
+        <div class="timeline-section-content">
+            <div class="timeline-list" id="timelineList"></div>
+            <div class="timeline-empty" id="timelineEmpty" style="display: none;">
+                <div class="timeline-empty-icon"><span class="icon icon-calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span></div>
+                <div>No activity yet</div>
+            </div>
+        </div>
+    </div>
+    
+<!-- Notes Section -->
+<div class="notes-section" id="notesSection">
+    <div class="section-header-simple">
+        <h2 class="section-title" style="font-size: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+            
+            <span>Notes</span>
+        </h2>
+        <button class="btn-schedule-meeting" onclick="openNoteModal()" title="Add Note" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;">
+            <span>+</span>
+        </button>
+    </div>
+        <div class="notes-section-content">
+            <div class="notes-list" id="notesList"></div>
+            <div class="empty-state" id="notesEmpty" style="display: none;">
+                <div class="empty-state-icon"><span class="icon icon-edit-3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span></div>
+                <div>No notes</div>
+            </div>
+        </div>
+    </div>
+</div>
+    </div>
+
+    <!-- Tags Modal -->
+    <div class="modal" id="tagsOverviewModal">
+        <div class="modal-content xlarge">
+            <div class="modal-header">
+                <h3 class="modal-title"><span class="icon icon-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span> Tags</h3>
+                <button class="close-btn" id="closeTagsOverviewBtn">×</button>
+            </div>
+            <div class="tags-overview-content">
+                <div class="tags-list-section">
+                    <h4 style="margin-bottom: 0.5rem; font-size: 0.85rem;">All Tags</h4>
+                    <div id="tagsListContainer"></div>
+                    <div class="empty-state" id="tagsEmpty" style="display: none; padding: 1rem 0;">
+                        <div class="empty-state-icon"><span class="icon icon-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span></div>
+                        <div>No tags</div>
+                    </div>
+                </div>
+                <div class="customers-by-tag-section">
+                    <h4 style="margin-bottom: 0.5rem; font-size: 0.85rem;" id="selectedTagTitle">Select a tag</h4>
+                    <div id="customersByTagContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customers Modal -->
+    <div class="modal" id="customersModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Customers</h3>
+                <button class="close-btn" id="closeCustomersModalBtn">×</button>
+            </div>
+            <button class="btn btn-primary" id="openAddCustomerBtn" style="margin-bottom: 0.75rem; width: 100%;">+ Add Customer</button>
+            <div class="customer-list" id="customerList"></div>
+            <div class="empty-state" id="customersEmpty" style="display: none;">
+                <div class="empty-state-icon"><span class="icon icon-users"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span></div>
+                <div>No customers</div>
+            </div>
+        </div>
+    </div>
+
+<!-- Customer Form Modal -->
+<div class="modal" id="customerFormModal">
+    <div class="modal-content large">
+        <div class="modal-header">
+            <h3 class="modal-title" id="customerFormTitle">Customer Profile</h3>
+            <button class="close-btn" id="closeCustomerFormBtn">×</button>
+        </div>
+        <form id="customerForm">
+            <input type="hidden" id="customerId">
+            
+            <!-- Basic Information -->
+            <div class="customer-profile-section" style="margin-bottom: 1rem;">
+                <div class="customer-profile-section-title">
+                    <span class="icon icon-building"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><line x1="8" y1="6" x2="8" y2="6"/><line x1="12" y1="6" x2="12" y2="6"/><line x1="16" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="8" y2="10"/><line x1="12" y1="10" x2="12" y2="10"/><line x1="16" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/></svg></span> Company Information
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Company Name *</label>
+                    <input type="text" class="form-input" id="customerName" required>
+                </div>
+            </div>
+
+            <!-- All Info in One Row -->
+            <div class="customer-profile-section" style="margin-bottom: 1rem;">
+                <div class="customer-profile-section-title">
+                    <span class="icon icon-clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg></span> Details
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem;">
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-input" id="customerEmail">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone</label>
+                        <input type="tel" class="form-input" id="customerPhone">
+                    </div>
+                    <div class="form-group">
+    <label class="form-label">Website</label>
+    <input type="text" class="form-input" id="customerWebsite" placeholder="example.com">
+</div>
+                    <div class="form-group">
+                        <label class="form-label">Industry</label>
+                        <input type="text" class="form-input" id="customerIndustry" placeholder="e.g., Technology">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Company Size</label>
+                        <select class="form-select" id="customerSize">
+                            <option value="">Select...</option>
+                            <option value="1-10">1-10</option>
+                            <option value="11-50">11-50</option>
+                            <option value="51-200">51-200</option>
+                            <option value="201-500">201-500</option>
+                            <option value="501-1000">501-1000</option>
+                            <option value="1000+">1000+</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">LinkedIn</label>
+                        <input type="url" class="form-input" id="customerLinkedIn" placeholder="https://linkedin.com/company/...">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Address Information -->
+            <div class="customer-profile-section" style="margin-bottom: 1rem;">
+                <div class="customer-profile-section-title">
+                    <span class="icon icon-map-pin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span> Address
+                </div>
+                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+                    <div class="form-group">
+                        <label class="form-label">Street Address</label>
+                        <input type="text" class="form-input" id="customerAddress">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">City</label>
+                        <input type="text" class="form-input" id="customerCity">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">State</label>
+                        <input type="text" class="form-input" id="customerState">
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 0.75rem;">
+                    <div class="form-group">
+                        <label class="form-label">Zip Code</label>
+                        <input type="text" class="form-input" id="customerZip">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Country</label>
+                        <input type="text" class="form-input" id="customerCountry">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Google Maps Link</label>
+                        <input type="url" class="form-input" id="customerMapsLink" placeholder="https://maps.google.com/...">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-footer">
+                <button type="button" class="btn btn-secondary" id="cancelCustomerFormBtn">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Customer</button>
+            </div>
+        </form>
+    </div>
+</div>
+   
+
+    <!-- All Meetings Modal -->
+    <div class="modal" id="allMeetingsModal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3 class="modal-title">All Meetings</h3>
+                <button class="close-btn" id="closeAllMeetingsBtn">×</button>
+            </div>
+            <div id="allMeetingsList"></div>
+            <div class="empty-state" id="meetingsEmpty" style="display: none;">
+                <div class="empty-state-icon"><span class="icon icon-calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span></div>
+                <div>No meetings</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div class="modal" id="taskModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Task</h3>
+                <button class="close-btn" id="closeTaskModalBtn">×</button>
+            </div>
+            <form id="taskForm">
+                <input type="hidden" id="taskId">
+                <input type="hidden" id="taskMeetingId">
+                
+                <div class="form-group">
+                    <label class="form-label">Title *</label>
+                    <input type="text" class="form-input" id="taskTitle" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-textarea" id="taskDescription"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Customer</label>
+                    <div class="customer-combobox">
+                        <input type="text" class="customer-combobox-input" id="taskCustomerInput" placeholder="Customer..." autocomplete="off">
+                        <div class="customer-dropdown" id="taskCustomerDropdown"></div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Priority</label>
+                        <select class="form-select" id="taskPriority">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <select class="form-select" id="taskStatus">
+                            <option value="todo">To Do</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="done">Done</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Due Date</label>
+                    <input type="date" class="form-input" id="taskDueDate">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Color</label>
+                    <div class="color-picker">
+                        <div class="color-option" data-color="none" style="background: var(--bg-tertiary)"></div>
+                        <div class="color-option" data-color="red" style="background: #ef4444"></div>
+                        <div class="color-option" data-color="orange" style="background: #f97316"></div>
+                        <div class="color-option" data-color="yellow" style="background: #eab308"></div>
+                        <div class="color-option" data-color="green" style="background: #10b981"></div>
+                        <div class="color-option" data-color="blue" style="background: #3b82f6"></div>
+                        <div class="color-option" data-color="purple" style="background: #8b5cf6"></div>
+                        <div class="color-option" data-color="pink" style="background: #ec4899"></div>
+                    </div>
+                    <input type="hidden" id="taskColor" value="none">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Tags</label>
+                    <input type="text" class="form-input" id="taskTags" placeholder="tag1, tag2">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Subtasks</label>
+                    <div class="subtasks-form" id="subtasksForm"></div>
+                    <button type="button" class="btn-add-subtask" id="addSubtaskBtn">+ Add</button>
+                </div>
+                <div class="form-footer">
+                    <button type="button" class="btn btn-secondary" id="cancelTaskBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+<!-- Add Participant Modal -->
+<div class="modal" id="addParticipantModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Add New Person</h3>
+            <button class="close-btn" id="closeAddParticipantBtn">×</button>
+        </div>
+        <form id="addParticipantForm">
+            <input type="hidden" id="addParticipantCustomerId">
+            
+            <div class="form-group">
+                <label class="form-label">Name *</label>
+                <input type="text" class="form-input" id="addParticipantName" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Role</label>
+                <input type="text" class="form-input" id="addParticipantRole" placeholder="e.g., VP of Sales">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-input" id="addParticipantEmail" placeholder="name.1@company.com, name.2@company.com">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Phone</label>
+                <input type="tel" class="form-input" id="addParticipantPhone" placeholder="+1 (555) 123-4567, +30 4324353434">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Add to Meeting (Optional)</label>
+                <select class="form-select" id="addParticipantMeetingId">
+                    <option value="">Don't add to a specific meeting</option>
+                </select>
+                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.35rem;">
+                    <span class="icon icon-lightbulb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg></span> If no meeting is selected, this person will be available for future meetings
+                </div>
+            </div>
+            
+            <div class="form-footer">
+                <button type="button" class="btn btn-secondary" id="cancelAddParticipantBtn">Cancel</button>
+                <button type="submit" class="btn btn-primary">+ Add Person</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Create Tab Modal -->
+<div class="modal" id="createTabModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title" id="tabModalTitle">Create Meeting Tab</h3>
+            <button class="close-btn" id="closeCreateTabBtn" onclick="closeCreateTabModal()">×</button>
+        </div>
+        <form id="createTabForm" onsubmit="handleTabFormSubmit(event); return false;">
+            <input type="hidden" id="editingTabId">
+            
+            <div class="form-group">
+                <label class="form-label">Tab Name *</label>
+                <input type="text" class="form-input" id="tabName" placeholder="e.g., Q4 Reviews, Discovery Calls" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Icon (optional)</label>
+                <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.5rem;">
+                    <button type="button" class="btn btn-secondary tab-icon-option" data-icon="<span class="icon icon-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>" style="padding: 0.5rem;"><span class="icon icon-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span></button>
+                    <button type="button" class="btn btn-secondary tab-icon-option" data-icon="<span class="icon icon-film"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/><line x1="17" y1="17" x2="22" y2="17"/></svg></span>" style="padding: 0.5rem;"><span class="icon icon-film"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/><line x1="17" y1="17" x2="22" y2="17"/></svg></span></button>
+                    <button type="button" class="btn btn-secondary tab-icon-option" data-icon="<span class="icon icon-briefcase"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>" style="padding: 0.5rem;"><span class="icon icon-briefcase"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span></button>
+                    <button type="button" class="btn btn-secondary tab-icon-option" data-icon="<span class="icon icon-bar-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg></span>" style="padding: 0.5rem;"><span class="icon icon-bar-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg></span></button>
+                    <button type="button" class="btn btn-secondary tab-icon-option" data-icon="<span class="icon icon-handshake"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 0C1.46 6.7 1.33 10.28 4 13l8 8 8-8c2.67-2.72 2.54-6.3.42-8.42z"/></svg></span>" style="padding: 0.5rem;"><span class="icon icon-handshake"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 0C1.46 6.7 1.33 10.28 4 13l8 8 8-8c2.67-2.72 2.54-6.3.42-8.42z"/></svg></span></button>
+                    <button type="button" class="btn btn-secondary tab-icon-option" data-icon="<span class="icon icon-phone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>" style="padding: 0.5rem;"><span class="icon icon-phone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span></button>
+                    <button type="button" class="btn btn-secondary tab-icon-option" data-icon="<span class="icon icon-calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>" style="padding: 0.5rem;"><span class="icon icon-calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span></button>
+                    <button type="button" class="btn btn-secondary tab-icon-option" data-icon="<span class="icon icon-lightbulb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg></span>" style="padding: 0.5rem;"><span class="icon icon-lightbulb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg></span></button>
+                    <button type="button" class="btn btn-secondary tab-icon-option" data-icon="<span class="icon icon-zap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>" style="padding: 0.5rem;"><span class="icon icon-zap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span></button>
+                    <button type="button" class="btn btn-secondary tab-icon-option" data-icon="<span class="icon icon-target"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>" style="padding: 0.5rem;"><span class="icon icon-target"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span></button>
+                    <button type="button" class="btn btn-secondary tab-icon-option" data-icon="<span class="icon icon-rocket"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg></span>" style="padding: 0.5rem;"><span class="icon icon-rocket"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg></span></button>
+                    <button type="button" class="btn btn-secondary tab-icon-option" data-icon="<span class="icon icon-clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg></span>" style="padding: 0.5rem;"><span class="icon icon-clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg></span></button>
+                </div>
+                <input type="hidden" id="tabIcon" value="">
+            </div>
+            
+            <div class="form-footer">
+                <button type="button" class="btn btn-secondary" id="cancelCreateTabBtn" onclick="closeCreateTabModal()">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="handleTabFormSubmit(event)">Save Tab</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Custom Meeting Type Modal -->
+<div class="modal" id="customMeetingTypeModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title" id="customMeetingTypeModalTitle">Add Meeting Type</h3>
+            <button class="close-btn" id="closeCustomMeetingTypeBtn">×</button>
+        </div>
+        <form id="customMeetingTypeForm" onsubmit="handleCustomMeetingTypeSubmit(event); return false;">
+            <input type="hidden" id="editingMeetingTypeSlug">
+            
+            <div class="form-group">
+                <label class="form-label">Type Name *</label>
+                <input type="text" class="form-input" id="customMeetingTypeName" placeholder="e.g., Negotiation, Training, Check-in" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Select Icon *</label>
+                <div class="meeting-type-icon-grid" id="meetingTypeIconGrid">
+
+                    <button type="button" class="meeting-type-icon-option" data-icon="search"><span class="icon icon-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span></button>
+                    <button type="button" class="meeting-type-icon-option" data-icon="phone"><span class="icon icon-phone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span></button>
+                    <button type="button" class="meeting-type-icon-option" data-icon="film"><span class="icon icon-film"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/><line x1="17" y1="17" x2="22" y2="17"/></svg></span></button>
+                    <button type="button" class="meeting-type-icon-option" data-icon="briefcase"><span class="icon icon-briefcase"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span></button>
+                    <button type="button" class="meeting-type-icon-option" data-icon="calendar"><span class="icon icon-calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span></button>
+                    <button type="button" class="meeting-type-icon-option" data-icon="clipboard"><span class="icon icon-clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg></span></button>
+                    <button type="button" class="meeting-type-icon-option" data-icon="handshake"><span class="icon icon-handshake"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 0C1.46 6.7 1.33 10.28 4 13l8 8 8-8c2.67-2.72 2.54-6.3.42-8.42z"/></svg></span></button>
+                    <button type="button" class="meeting-type-icon-option" data-icon="lightbulb"><span class="icon icon-lightbulb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg></span></button>
+                    <button type="button" class="meeting-type-icon-option" data-icon="zap"><span class="icon icon-zap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span></button>
+                    <button type="button" class="meeting-type-icon-option" data-icon="target"><span class="icon icon-target"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span></button>
+                    <button type="button" class="meeting-type-icon-option" data-icon="rocket"><span class="icon icon-rocket"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg></span></button>
+                    <button type="button" class="meeting-type-icon-option" data-icon="bar-chart"><span class="icon icon-bar-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg></span></button>
+                    <button type="button" class="meeting-type-icon-option" data-icon="award"><span class="icon icon-award"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg></span></button>
+                    <button type="button" class="meeting-type-icon-option" data-icon="trophy"><span class="icon icon-trophy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg></span></button>
+                    <button type="button" class="meeting-type-icon-option" data-icon="settings"><span class="icon icon-settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span></button>
+                    <button type="button" class="meeting-type-icon-option" data-icon="bell"><span class="icon icon-bell"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span></button>
+                    <button type="button" class="meeting-type-icon-option" data-icon="message"><span class="icon icon-message"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span></button>
+                    <button type="button" class="meeting-type-icon-option" data-icon="smartphone"><span class="icon icon-smartphone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></span></button>
+                    <button type="button" class="meeting-type-icon-option" data-icon="sparkle"><span class="icon icon-sparkle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.912 5.813L20 10l-6.088 1.187L12 17l-1.912-5.813L4 10l6.088-1.187L12 3z"/></svg></span></button>
+                    <button type="button" class="meeting-type-icon-option" data-icon="flame"><span class="icon icon-flame"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></span></button>
+                    <button type="button" class="meeting-type-icon-option" data-icon="check"><span class="icon icon-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span></button>
+                    <button type="button" class="meeting-type-icon-option" data-icon="star"><span class="icon icon-star"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span></button>
+                    <button type="button" class="meeting-type-icon-option" data-icon="party"><span class="icon icon-party"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5.8 11.3L2 22l10.7-3.79"/><path d="M4 3h.01"/><path d="M22 8h.01"/><path d="M15 2h.01"/><path d="M22 20h.01"/><path d="M22 2l-2.24.75a2.9 2.9 0 0 0-1.96 3.12v0c.1.86-.57 1.63-1.45 1.63h-.38c-.86 0-1.6.6-1.76 1.44L14 10"/><path d="M22 13l-1.34-.45a2.9 2.9 0 0 0-3.12 1.96v0a1.53 1.53 0 0 1-1.63 1.45h0a1.77 1.77 0 0 0-1.44 1.76L14 20"/></svg></span></button>
+                    <button type="button" class="meeting-type-icon-option" data-icon="trending-up"><span class="icon icon-trending-up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span></button>
+
+                </div>
+                <input type="hidden" id="selectedMeetingTypeIcon" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Custom Emoji (Optional)</label>
+                <input type="text" class="form-input" id="customMeetingTypeEmoji" placeholder="Paste any emoji here" maxlength="2">
+                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.35rem;">
+                    <span class="icon icon-lightbulb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg></span> You can paste any emoji from your device or use the grid above
+                </div>
+            </div>
+            
+            <div class="form-footer">
+                <button type="button" class="btn btn-secondary" id="cancelCustomMeetingTypeBtn">Cancel</button>
+                <button type="submit" class="btn btn-primary"><span class="icon icon-save"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></span> Save Type</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Phone Call Modal -->
+<div class="modal" id="phoneCallModal">
+    <div class="modal-content" style="max-width: 480px;">
+        <div class="modal-header">
+            <h3 class="modal-title">Log Phone Call</h3>
+            <button class="close-btn" onclick="closePhoneCallModal()">×</button>
+        </div>
+
+        <!-- Connected / Not Connected toggle -->
+<div style="display:flex; background:#f3f4f6; border-radius:8px; padding:3px; margin-bottom:1rem; gap:0;">
+    <button type="button" id="callToggleConnected" onclick="setCallMode('connected')"
+        style="flex:1; padding:0.5rem 1rem; border:none; border-radius:6px; font-size:0.85rem; 
+               font-weight:600; cursor:pointer; transition:all 0.2s;
+               background:linear-gradient(135deg, #023747 0%, #1ba8af 100%);
+               color:white; box-shadow:0 2px 6px rgba(27,168,175,0.3);">
+        Connected
+    </button>
+    <button type="button" id="callToggleNotConnected" onclick="setCallMode('not-connected')"
+        style="flex:1; padding:0.5rem 1rem; border:none; border-radius:6px; font-size:0.85rem;
+               font-weight:600; cursor:pointer; transition:all 0.2s;
+               background:transparent; color:#9ca3af;">
+        Not Connected
+    </button>
+</div>
+
+
+        <!-- Not connected banner (hidden by default) -->
+        <div class="call-not-connected-banner" id="callNotConnectedBanner" style="display:none;">
+            <span class="icon icon-warning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span> No notes needed — just logging the attempt
+        </div>
+
+        <form id="phoneCallForm">
+            <input type="hidden" id="callId">
+            <input type="hidden" id="callMode" value="connected">
+
+            <!-- Customer -->
+            <div class="form-group">
+                <label class="form-label">Customer *</label>
+                <div class="customer-combobox">
+                    <input type="text" class="customer-combobox-input" id="callCustomerInput"
+                           placeholder="Type to search or add customer..." autocomplete="off">
+                    <div class="customer-dropdown" id="callCustomerDropdown"></div>
+                </div>
+            </div>
+
+            <!-- Date + Duration (duration hidden when not connected) -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Date & Time *</label>
+                    <input type="datetime-local" class="form-input" id="callDate">
+                </div>
+                <div class="form-group" id="callDurationGroup">
+                    <label class="form-label">Duration (min)</label>
+                    <input type="number" class="form-input" id="callDuration" placeholder="15" min="1">
+                </div>
+                <div class="form-group" id="callReasonGroup" style="display:none;">
+                    <label class="form-label">Reason</label>
+                    <select class="form-select" id="callReason">
+                        <option value="No Answer">No Answer</option>
+                        <option value="Voicemail">Voicemail</option>
+                        <option value="Busy">Busy</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Spoke With / Tried to Reach -->
+            <div class="form-group">
+                <label class="form-label" id="callContactLabel">Spoke With</label>
+                <div class="quick-add-contacts active" id="callQuickAddContacts" style="display:none;">
+                    <div class="quick-add-contacts-title">
+                        <span><span class="icon icon-zap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span></span><span>Quick Add from Contacts</span>
+                    </div>
+                    <div class="quick-add-contacts-list" id="callQuickAddList"></div>
+                </div>
+                <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+                    <input type="text" class="form-input" id="callContactInput" placeholder="Contact name...">
+                    <button type="button" class="btn btn-primary" onclick="addCallContact()" style="white-space:nowrap; padding: 0.5rem 0.75rem;">+ Add</button>
+                </div>
+                <div id="callContactsList" style="display:flex; flex-wrap:wrap; gap:0.35rem;"></div>
+            </div>
+
+            <!-- Notes (hidden when not connected) -->
+            <div class="form-group" id="callNotesGroup">
+                <label class="form-label">Call Notes</label>
+                <textarea class="form-textarea" id="callNotes" placeholder="What was discussed..." style="min-height:80px;"></textarea>
+            </div>
+
+            <!-- Action Items (hidden when not connected) -->
+            <div class="form-group" id="callActionsGroup">
+                <label class="form-label">Action Items</label>
+                <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+                    <input type="text" class="form-input" id="callActionInput" placeholder="Add action item...">
+                    <button type="button" class="btn btn-primary" onclick="addCallAction()" style="white-space:nowrap; padding: 0.5rem 0.75rem;">+ Add</button>
+                </div>
+                <div id="callActionsList"></div>
+            </div>
+
+            <div class="form-footer">
+                <button type="button" class="btn btn-secondary" onclick="closePhoneCallModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Call</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- Tab Context Menu -->
+<div class="tab-context-menu" id="tabContextMenu">
+    <div class="tab-context-menu-item" onclick="renameTab()">
+        <span><span class="icon icon-pencil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></span></span>
+        <span>Rename</span>
+    </div>
+    <div class="tab-context-menu-item delete" onclick="deleteTab()">
+        <span><span class="icon icon-trash"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></span></span>
+        <span>Delete Tab</span>
+    </div>
+</div>
+
+<!-- Consolidated Notes Modal -->
+<div class="modal" id="consolidatedNotesModal">
+    <div class="modal-content xlarge">
+        <div class="modal-header">
+            <h3 class="modal-title" id="consolidatedNotesTitle"><span class="icon icon-clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg></span> All Meeting Notes</h3>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <button class="fullscreen-btn" id="consolidatedNotesFullscreenBtn" onclick="toggleModalFullscreen('consolidatedNotesModal', 'consolidatedNotesFullscreenBtn')"><span class="icon icon-maximize"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></span> Expand</button>
+                <button class="close-btn" id="closeConsolidatedNotesBtn">×</button>
+            </div>
+        </div>
+        
+        <div class="modal-tabs">
+            <button type="button" class="modal-tab active" data-tab="view" data-form="consolidated">
+                <span class="icon icon-book"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span> View All
+            </button>
+            <button type="button" class="modal-tab" data-tab="export" data-form="consolidated">
+                <span class="icon icon-upload"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span> Export
+            </button>
+        </div>
+        
+  <div class="tab-content active" data-tab-content="view">
+    <div id="consolidatedNotesContent"></div>
+</div>
+        
+        <div class="tab-content" data-tab-content="export">
+            <div class="export-content">
+                <h4 style="margin-bottom: 0.5rem; font-size: 0.9rem;"><span class="icon icon-file-text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span> Export All Meeting Notes</h4>
+                <div class="export-preview" id="consolidatedNotesExportPreview">Preview...</div>
+                <div class="export-actions">
+                    <button type="button" class="btn-export" id="copyConsolidatedNotesBtn">Copy</button>
+                    <button type="button" class="btn-export" id="downloadConsolidatedNotesBtn">Download</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Follow-Up Meeting Modal -->
+<div class="modal" id="followUpModal">
+    <div class="modal-content" style="max-width: 700px;">
+        <div class="modal-header">
+            <h2 style="margin: 0;" id="followUpModalTitle"><span class="icon icon-refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></span> Create Follow-Up Meeting</h2>
+            <button class="close-btn" onclick="closeFollowUpModal()">&times;</button>
+        </div>
+        <div style="padding: 1.5rem; max-height: 600px; overflow-y: auto;">
+            
+           <!-- Step 1: Meeting Type (MOVED TO FIRST) -->
+<div class="follow-up-step">
+    <h3 style="margin-bottom: 1rem; color: var(--text-primary); font-size: 1.1rem;">Step 1: Meeting Type</h3>
+    
+    <label class="follow-up-type-option" style="display: flex; align-items: flex-start; gap: 0.75rem; 
+           padding: 1rem; border: 2px solid var(--primary); border-radius: 8px; 
+           cursor: pointer; margin-bottom: 1rem; background: var(--bg-secondary);">
+        <input type="radio" name="followUpType" value="upcoming" 
+               style="margin-top: 0.25rem; cursor: pointer;">
+        <div style="flex: 1;">
+            <div style="font-weight: 600; margin-bottom: 0.25rem; font-size: 0.95rem;">
+                <span class="icon icon-calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span> Upcoming Meeting (scheduled for future)
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
+                Will appear in "Upcoming Meetings" section
+            </div>
+            <input type="datetime-local" id="followUpDateUpcoming" class="form-input"
+                   style="width: 100%; max-width: 250px;">
+        </div>
+    </label>
+    
+    <label class="follow-up-type-option" style="display: flex; align-items: flex-start; gap: 0.75rem; 
+           padding: 1rem; border: 2px solid var(--border); border-radius: 8px; 
+           cursor: pointer; background: var(--bg-secondary);">
+        <input type="radio" name="followUpType" value="past" 
+               style="margin-top: 0.25rem; cursor: pointer;">
+        <div style="flex: 1;">
+            <div style="font-weight: 600; margin-bottom: 0.25rem; font-size: 0.95rem;">
+                <span class="icon icon-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span> New Meeting (happening now or already completed)
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
+                Will go directly to "Meetings" section
+            </div>
+            <input type="datetime-local" id="followUpDatePast" class="form-input"
+                   style="width: 100%; max-width: 250px;">
+        </div>
+    </label>
+</div>
+            
+            <hr style="margin: 1.5rem 0; border: none; border-top: 2px solid var(--border);">
+            
+            <!-- Step 2: Select Meetings (MOVED TO SECOND) -->
+            <div class="follow-up-step">
+                <h3 style="margin-bottom: 1rem; color: var(--text-primary); font-size: 1.1rem;" id="followUpStep1Title">Step 2: Select Meeting(s) to Follow Up</h3>
+                
+                <!-- Search and Filters -->
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
+                    <input type="text" id="followUpSearch" placeholder="Search meetings..." class="form-input"
+                           style="flex: 1; min-width: 200px;" oninput="filterFollowUpMeetings()">
+                    <select id="followUpCustomerFilter" class="form-select" onchange="filterFollowUpMeetings()" 
+                            style="width: 180px;">
+                        <option value="all">All Customers</option>
+                    </select>
+<select id="followUpDateFilter" class="form-select" onchange="filterFollowUpMeetings()" 
+        style="width: 150px;">
+    <option value="30">Last 30 Days</option>
+    <option value="60">Last 60 Days</option>
+    <option value="90">Last 90 Days</option>
+    <option value="all" selected>All Time</option>
+</select>
+                </div>
+                
+                <!-- Meetings List -->
+                <div id="followUpMeetingsList" style="border: 2px solid var(--border); border-radius: 8px; 
+                     max-height: 300px; overflow-y: auto; padding: 0.5rem; background: var(--bg-secondary);">
+                    <!-- Populated by JS -->
+                </div>
+                
+                <!-- Selection Counter -->
+                <div id="followUpSelectionCount" style="margin-top: 0.5rem; font-size: 0.9rem; 
+                     color: var(--text-secondary); font-weight: 500;">
+                    No meetings selected
+                </div>
+                
+                <!-- Warning for multiple customers -->
+                <div id="followUpCustomerWarning" style="display: none; margin-top: 1rem; 
+                     padding: 0.75rem; background: rgba(245, 158, 11, 0.15); border-left: 4px solid var(--warning); 
+                     border-radius: 4px; color: var(--text-primary);">
+                    <span class="icon icon-warning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span> You've selected meetings from different customers. Please select meetings from ONE customer only.
+                </div>
+            </div>
+            
+            <hr style="margin: 1.5rem 0; border: none; border-top: 2px solid var(--border);">
+            
+            <!-- Step 3: Select Participants (NEW) -->
+            <div class="follow-up-step">
+                <h3 style="margin-bottom: 1rem; color: var(--text-primary); font-size: 1.1rem;">Step 3: Select Participants</h3>
+                
+                <!-- Quick Add from Contacts -->
+                <div class="quick-add-contacts active" id="followUpQuickAddContacts" style="margin-bottom: 1rem;">
+                    <div class="quick-add-contacts-title">
+                        <span><span class="icon icon-zap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span></span>
+                        <span>Quick Add from Contacts</span>
+                    </div>
+                    <div class="quick-add-contacts-list" id="followUpQuickAddList"></div>
+                </div>
+                
+                <!-- Manual Add Form -->
+                <div style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px;">
+                    <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); 
+                         text-transform: uppercase; margin-bottom: 0.75rem;">Or Add New Participant</div>
+                    <div class="form-row" style="margin-bottom: 0.75rem;">
+                        <input type="text" class="form-input" id="followUpParticipantName" placeholder="Name *">
+                        <input type="text" class="form-input" id="followUpParticipantRole" placeholder="Role">
+                    </div>
+                    <div class="form-row" style="margin-bottom: 0.75rem;">
+                        <input type="email" class="form-input" id="followUpParticipantEmail" placeholder="Email">
+                        <input type="tel" class="form-input" id="followUpParticipantPhone" placeholder="Phone">
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="addFollowUpParticipant()" style="width: 100%;">
+                        + Add Participant
+                    </button>
+                </div>
+                
+                <!-- Selected Participants List -->
+                <div style="margin-top: 1rem;">
+                    <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); 
+                         text-transform: uppercase; margin-bottom: 0.5rem;">
+                        Selected Participants (<span id="followUpParticipantsCount">0</span>)
+                    </div>
+                    <div class="participant-grid" id="followUpParticipantsList"></div>
+                </div>
+            </div>
+            
+            <hr style="margin: 1.5rem 0; border: none; border-top: 2px solid var(--border);">
+            
+            <!-- Preview -->
+            <div id="followUpPreview" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 197, 253, 0.1)); 
+                 padding: 1rem; border-radius: 8px; border-left: 4px solid var(--info);">
+                <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);"><span class="icon icon-clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg></span> Preview:</div>
+                <div id="followUpPreviewContent" style="font-size: 0.9rem; color: var(--text-primary);">
+                    Select meeting type and meetings to see preview
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-footer">
+            <button class="btn btn-secondary" onclick="closeFollowUpModal()">Cancel</button>
+            <button class="btn btn-primary" id="createFollowUpBtn" onclick="createFollowUpMeeting()" disabled>
+                Create Follow-Up →
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Participant Edit Modal -->
+<div class="modal" id="participantEditModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Edit Participant</h3>
+            <button class="close-btn" id="closeParticipantEditBtn">×</button>
+        </div>
+        <form id="participantEditForm">
+            <input type="hidden" id="editParticipantCustomerId">
+            <input type="hidden" id="editParticipantOriginalEmail">
+            
+            <div class="form-group">
+                <label class="form-label">Name *</label>
+                <input type="text" class="form-input" id="editParticipantName" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Role</label>
+                <input type="text" class="form-input" id="editParticipantRole">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-input" id="editParticipantEmail">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Phone</label>
+                <input type="tel" class="form-input" id="editParticipantPhone">
+            </div>
+            
+            <div class="form-footer">
+                <button type="button" class="btn btn-secondary" id="cancelParticipantEditBtn">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+    <!-- Note Modal -->
+    <div class="modal" id="noteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Note</h3>
+                <button class="close-btn" id="closeNoteModalBtn">×</button>
+            </div>
+            <form id="noteForm">
+                <input type="hidden" id="noteId">
+<div class="form-group">
+    <label class="form-label">Customer</label>
+    <select class="form-select" id="noteCustomer">
+        <option value="">None</option>
+    </select>
+</div>
+<div class="form-group">
+    <label class="form-label">Content *</label>
+                    <textarea class="form-textarea" id="noteContent" required style="min-height: 120px;"></textarea>
+                </div>
+                <div class="form-footer">
+                    <button type="button" class="btn btn-secondary" id="cancelNoteBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div class="modal" id="exportModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="exportModalTitle">Export</h3>
+                <button class="close-btn" id="closeExportModalBtn">×</button>
+            </div>
+            <div class="export-content">
+                <div class="export-preview" id="exportModalPreview"></div>
+                <div class="export-actions">
+                    <button type="button" class="btn-export" id="copyExportModalBtn">Copy</button>
+                    <button type="button" class="btn-export" id="downloadExportModalBtn">Download</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="confirm-modal" id="confirmModal">
+        <div class="confirm-content">
+            <div class="confirm-icon" id="confirmIcon"><span class="icon icon-warning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span></div>
+            <h3 class="confirm-title" id="confirmTitle">Confirm</h3>
+            <p class="confirm-message" id="confirmMessage">Are you sure?</p>
+            <div class="confirm-actions">
+                <button class="btn btn-secondary" id="cancelConfirmBtn">Cancel</button>
+                <button class="btn btn-danger" id="confirmBtn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+<!-- Upgrade Modal -->
+<div class="modal" id="upgradeModal">
+    <div class="modal-content upgrade-modal-content">
+        <div class="modal-header"><h3 class="modal-title">Choose Your Plan</h3><button class="close-btn" onclick="closeUpgradeModal()">×</button></div>
+        <p style="text-align:center;color:var(--text-secondary);margin-bottom:1rem">Unlock more customers and keep growing your business</p>
+        <div class="plans-grid">
+            <div class="plan-card current" data-plan="free"><div class="plan-name">Free</div><div class="plan-price">$0<span>/mo</span></div><div class="plan-limit">6 customers</div><button class="plan-btn secondary">Current Plan</button></div>
+            <div class="plan-card popular" data-plan="starter"><div class="plan-name">Starter</div><div class="plan-price">$9<span>/mo</span></div><div class="plan-limit">15 customers</div><button class="plan-btn primary" onclick="selectPlan('starter')">Upgrade</button></div>
+            <div class="plan-card" data-plan="pro"><div class="plan-name">Pro</div><div class="plan-price">$19<span>/mo</span></div><div class="plan-limit">50 customers</div><button class="plan-btn primary" onclick="selectPlan('pro')">Upgrade</button></div>
+            <div class="plan-card" data-plan="unlimited"><div class="plan-name">Unlimited</div><div class="plan-price">$29<span>/mo</span></div><div class="plan-limit">Unlimited</div><button class="plan-btn primary" onclick="selectPlan('unlimited')">Upgrade</button></div>
+        </div>
+        <div class="billing-toggle"><span>Annual billing: Save 20%</span><button class="active" onclick="setBilling('monthly')">Monthly</button><button onclick="setBilling('annual')">Annual</button></div>
+    </div>
+</div>
+
+<!-- Auth Modal -->
+<div class="modal" id="authModal">
+    <div class="modal-content" style="max-width: 400px;">
+        <div class="modal-header">
+            <h3 class="modal-title" id="authModalTitle">Sign In</h3>
+            <button class="close-btn" onclick="closeAuthModal()">×</button>
+        </div>
+        <div id="authContent">
+            <button class="btn btn-primary" onclick="signInWithGoogle()" style="width: 100%; margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                <svg viewBox="0 0 24 24" style="width: 20px; height: 20px;"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                Continue with Google
+            </button>
+            <div style="text-align: center; color: var(--text-secondary); margin: 1rem 0; font-size: 0.85rem;">or use email</div>
+            <form id="authForm" onsubmit="handleEmailAuth(event)">
+                <div class="form-group">
+                    <input type="email" class="form-input" id="authEmail" placeholder="Email" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" class="form-input" id="authPassword" placeholder="Password (min 6 chars)" required minlength="6">
+                </div>
+                <div class="form-group" id="authNameGroup" style="display: none;">
+                    <input type="text" class="form-input" id="authDisplayName" placeholder="Your Name">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;" id="authSubmitBtn">Sign In</button>
+            </form>
+            <div style="text-align: center; margin-top: 1rem;">
+                <button onclick="toggleAuthMode()" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 0.85rem;" id="authToggleBtn">
+                    Need an account? Sign Up
+                </button>
+            </div>
+        </div>
+<div id="authUserInfo" style="display: none; text-align: center;">
+    <div style="font-size: 3rem; margin-bottom: 1rem;"><span class="icon icon-user"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span></div>
+    <div style="font-weight: 600; font-size: 1.1rem;" id="authUserName"></div>
+    <div style="color: var(--text-secondary); margin-bottom: 1.5rem;" id="authUserEmail"></div>
+    <button class="btn btn-danger" onclick="signOutUser()" style="width: 100%; margin-bottom: 0.75rem;">Sign Out</button>
+    <button class="btn btn-secondary" onclick="confirmDeleteAccount()" style="width: 100%; border-color: var(--danger); color: var(--danger);">
+        <span class="icon icon-trash"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></span> Delete Account
+    </button>
+    <div style="font-size: 0.75rem; color: var(--text-tertiary); margin-top: 0.75rem;">
+        Deleting your account will permanently remove all your data.
+    </div>
+</div>
+    </div>
+</div>
+
+<!-- Note Edit Modal -->
+<div class="modal" id="noteEditModal">
+    <div class="modal-content" style="max-width: 400px;">
+        <div class="modal-header">
+            <h3 class="modal-title"><span class="icon icon-edit-3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span> Edit Note</h3>
+            <button class="close-btn" onclick="closeNoteEditModal()">×</button>
+        </div>
+        <input type="hidden" id="noteEditMeetingId">
+        <textarea class="form-textarea" id="noteEditText" placeholder="Enter note..." style="min-height: 100px;"></textarea>
+        <div class="form-footer">
+            <button class="btn btn-secondary" onclick="closeNoteEditModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveEditedNote()">Save</button>
+        </div>
+    </div>
+</div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- ========== SHARING FEATURE MODALS - START ========== -->
+    <!-- Can delete this entire section when removing offline testing -->
+    
+    <!-- Share Modal -->
+    <div class="modal" id="shareModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="shareModalTitle"><span class="icon icon-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span> Share Meeting</h3>
+                <button class="close-btn" id="closeShareModalBtn">×</button>
+            </div>
+            
+            <div class="share-modal-tabs">
+                <button class="share-modal-tab active" data-share-tab="new">Share New</button>
+                <button class="share-modal-tab" data-share-tab="shared-with">Shared With (<span id="sharedWithCount">0</span>)</button>
+                <button class="share-modal-tab" data-share-tab="link">Link Sharing</button>
+            </div>
+            
+            <!-- Tab 1: Share New -->
+            <div class="share-tab-content active" data-share-tab-content="new">
+                <input type="hidden" id="shareModalMeetingId">
+                
+                <div class="form-group">
+                    <label class="form-label"><span class="icon icon-mail"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span> Email or Username</label>
+                    <input type="text" class="form-input" id="shareEmailInput" placeholder="Enter email address...">
+                </div>
+                
+               <div class="form-group">
+    <label class="form-label"><span class="icon icon-clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg></span> Select Tabs to Share</label>
+    <div style="display: grid; gap: 0.5rem;">
+        <label class="permission-option" style="padding: 0.5rem; cursor: pointer;">
+            <input type="checkbox" name="shareTab" value="info" checked style="width: auto; margin-right: 0.5rem;">
+            <div style="display: inline;">
+                <div style="font-weight: 600; display: inline;"><span class="icon icon-info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span> Info</div>
+                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-left: 0.5rem; display: inline;">(Customer, date, type, participants)</div>
+            </div>
+        </label>
+        <label class="permission-option" style="padding: 0.5rem; cursor: pointer;">
+            <input type="checkbox" name="shareTab" value="notes" checked style="width: auto; margin-right: 0.5rem;">
+            <div style="display: inline;">
+                <div style="font-weight: 600; display: inline;"><span class="icon icon-edit-3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span> Notes</div>
+                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-left: 0.5rem; display: inline;">(Meeting notes and next steps)</div>
+            </div>
+        </label>
+        <label class="permission-option" style="padding: 0.5rem; cursor: pointer;">
+            <input type="checkbox" name="shareTab" value="meddpicc" style="width: auto; margin-right: 0.5rem;">
+            <div style="display: inline;">
+                <div style="font-weight: 600; display: inline;"><span class="icon icon-target"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span> MEDDPICC</div>
+                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-left: 0.5rem; display: inline;">(Sales qualification data)</div>
+            </div>
+        </label>
+        <label class="permission-option" style="padding: 0.5rem; cursor: pointer;">
+            <input type="checkbox" name="shareTab" value="actions" style="width: auto; margin-right: 0.5rem;">
+            <div style="display: inline;">
+                <div style="font-weight: 600; display: inline;"><span class="icon icon-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span> Actions</div>
+                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-left: 0.5rem; display: inline;">(Action items and tasks)</div>
+            </div>
+        </label>
+    </div>
+    <div style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-secondary);">
+        <span class="icon icon-lightbulb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg></span> Select which information to share. Recipient can edit their copy after accepting.
+    </div>
+</div>
+                
+                <div class="form-group">
+                    <label class="form-label"><span class="icon icon-edit-3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span> Add Message (optional)</label>
+                    <textarea class="form-textarea" id="shareMessageInput" placeholder="Hey, check out these notes..." style="min-height: 80px;"></textarea>
+                </div>
+                
+<div class="form-group">
+    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+        <input type="checkbox" id="shareNotifyEmail" checked>
+        <span> Notify via email (coming soon)</span>
+    </label>
+</div>
+                
+                <div class="form-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeShareModal()">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="sendShareInvite()">Share Meeting <span class="icon icon-arrow-right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span></button>
+                </div>
+            </div>
+            
+            <!-- Tab 2: Shared With -->
+            <div class="share-tab-content" data-share-tab-content="shared-with">
+                <div class="shared-with-list" id="sharedWithList">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+            
+            <!-- Tab 3: Link Sharing -->
+            <div class="share-tab-content" data-share-tab-content="link">
+                <div class="link-sharing-section">
+                    <div class="link-toggle">
+                        <span style="flex: 1; font-weight: 600;"><span class="icon icon-globe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span> Anyone with Link</span>
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            <input type="checkbox" id="linkSharingEnabled" onchange="toggleLinkSharing()">
+                            <span>Enable</span>
+                        </label>
+                    </div>
+                    
+                    <div id="linkSharingOptions" style="display: none;">
+                        <div class="link-url-box">
+                            <input type="text" class="link-url-input" id="shareLinkUrl" readonly>
+                            <button class="btn btn-secondary" onclick="copyShareLink()"><span class="icon icon-clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg></span> Copy</button>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Permission</label>
+                            <select class="form-select" id="linkPermissionLevel">
+                                <option value="view">View Only</option>
+                                <option value="edit">Can Edit</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label"><span class="icon icon-clock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span> Expires</label>
+                            <select class="form-select" id="linkExpiration">
+                                <option value="never">Never</option>
+                                <option value="1">1 day</option>
+                                <option value="7">7 days</option>
+                                <option value="30">30 days</option>
+                            </select>
+                        </div>
+                        
+                        <div style="background: rgba(245, 158, 11, 0.15); padding: 0.75rem; border-radius: 6px; font-size: 0.85rem; color: var(--text-secondary);">
+                            <span class="icon icon-warning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span> Anyone with this link can access the meeting
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Accept Meeting Modal -->
+    <div class="modal" id="acceptMeetingModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Add Shared Meeting</h3>
+                <button class="close-btn" onclick="closeAcceptMeetingModal()">×</button>
+            </div>
+            
+            <input type="hidden" id="acceptMeetingId">
+            
+           <div style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 197, 253, 0.1)); 
+     padding: 1rem; border-radius: 8px; border-left: 4px solid var(--info); margin-bottom: 1rem;">
+    <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);"><span class="icon icon-clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg></span> Create Independent Copy</div>
+    <div style="font-size: 0.85rem; color: var(--text-secondary);">
+        This will create your own copy that you can edit freely. No syncing with the original.
+    </div>
+</div>
+            
+           <div class="form-group">
+    <label class="form-label">Select Customer/Location</label>
+    <div class="customer-combobox" style="position: relative;">
+        <input type="text" 
+               class="customer-combobox-input" 
+               id="acceptMeetingCustomerInput" 
+               placeholder="Type to search or add new customer..." 
+               autocomplete="off"
+               oninput="updateAcceptCustomerDropdown(this.value)"
+               onfocus="updateAcceptCustomerDropdown(this.value); document.getElementById('acceptCustomerDropdown').classList.add('active')">
+        <div class="customer-dropdown" id="acceptCustomerDropdown"></div>
+    </div>
+    <input type="hidden" id="acceptMeetingCustomer">
+    <div style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-secondary);">
+        <span class="icon icon-lightbulb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg></span> Type a name to search existing customers or create a new one
+    </div>
+</div>
+            
+            <div class="form-group">
+                <label class="form-label">Select Meeting Tab</label>
+                <select class="form-select" id="acceptMeetingTab">
+                    <option value="all">All Meetings</option>
+                    <option value="individual">Individual</option>
+                </select>
+            </div>
+            
+            <div class="form-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeAcceptMeetingModal()">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="acceptSharedMeeting()">Add Meeting <span class="icon icon-arrow-right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span></button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ========== SHARING FEATURE MODALS - END ========== -->
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content" style="max-width: 520px;">
+            <div class="modal-header">
+                <h3 class="modal-title"><span class="icon icon-settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span> Settings</h3>
+                <button class="close-btn" onclick="closeSettingsModal()">×</button>
+            </div>
+
+            <!-- Account Section -->
+            <div class="settings-section">
+                <div class="settings-section-title">Account</div>
+                <div class="settings-account-card" id="settingsAccountCard">
+                    <div class="settings-avatar" id="settingsAvatar"></div>
+                    <div class="settings-account-info">
+                        <div class="settings-account-name" id="settingsName">Not signed in</div>
+                        <div class="settings-account-email" id="settingsEmail"></div>
+                        <div class="settings-plan-badge" id="settingsPlanBadge">Free</div>
+                    </div>
+                </div>
+                <div class="settings-row">
+                    <span>Customer slots used</span>
+                    <span id="settingsSlotCount" style="font-weight:600;">—</span>
+                </div>
+                <div class="settings-row">
+                    <button class="btn btn-secondary" style="width:100%;" onclick="closeSettingsModal(); openUpgradeModal();">Manage Plan</button>
+                </div>
+                <div class="settings-row">
+                    <button class="btn btn-secondary" style="width:100%;" onclick="closeSettingsModal(); signOutUser();">Sign Out</button>
+                </div>
+            </div>
+
+            <!-- AI Features Section -->
+            <div class="settings-section">
+                <div class="settings-section-title">AI Features</div>
+                <div class="settings-row">
+                    <span>AI Note Improvement</span>
+                    <label class="settings-toggle">
+                        <input type="checkbox" id="settingsAiNotes" checked onchange="updateSettingsAi()">
+                        <span class="settings-toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="settings-row">
+                    <span>AI Meeting Prep</span>
+                    <label class="settings-toggle">
+                        <input type="checkbox" id="settingsAiPrep" checked onchange="updateSettingsAi()">
+                        <span class="settings-toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="settings-row">
+                    <span>AI Summary</span>
+                    <label class="settings-toggle">
+                        <input type="checkbox" id="settingsAiSummary" checked onchange="updateSettingsAi()">
+                        <span class="settings-toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="settings-row" style="color: var(--text-tertiary); font-size: 0.8rem;">
+                    AI calls today: <span id="settingsAiUsage">0</span>/10
+                </div>
+            </div>
+
+            <!-- Notifications Section -->
+            <div class="settings-section">
+                <div class="settings-section-title">Notifications</div>
+                <div class="settings-row">
+                    <span>Meeting Reminders</span>
+                    <label class="settings-toggle">
+                        <input type="checkbox" id="settingsMeetingReminders" onchange="updateSettingsNotifications()">
+                        <span class="settings-toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="settings-row" id="settingsReminderTimingRow" style="display:none;">
+                    <span>Remind me</span>
+                    <select class="form-input" id="settingsReminderTiming" style="width:auto; padding:0.3rem 0.5rem; font-size:0.8rem;" onchange="updateSettingsNotifications()">
+                        <option value="5">5 min before</option>
+                        <option value="10">10 min before</option>
+                        <option value="15" selected>15 min before</option>
+                        <option value="30">30 min before</option>
+                    </select>
+                </div>
+                <div class="settings-row">
+                    <span>Task Due Alerts</span>
+                    <label class="settings-toggle">
+                        <input type="checkbox" id="settingsTaskAlerts" onchange="updateSettingsNotifications()">
+                        <span class="settings-toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="settings-row">
+                    <span>Shared Meeting Alerts</span>
+                    <label class="settings-toggle">
+                        <input type="checkbox" id="settingsShareAlerts" onchange="updateSettingsNotifications()">
+                        <span class="settings-toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="settings-row">
+                    <span>Sound</span>
+                    <label class="settings-toggle">
+                        <input type="checkbox" id="settingsSound" onchange="updateSettingsNotifications()">
+                        <span class="settings-toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Activity Thresholds Section -->
+            <div class="settings-section">
+                <div class="settings-section-title">Data</div>
+                <div class="settings-row">
+                    <button class="btn btn-secondary" style="flex:1;" onclick="closeSettingsModal(); document.getElementById('exportAllBtn').click();">
+                        <span class="icon icon-upload"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span> Export Data
+                    </button>
+                    <button class="btn btn-secondary" style="flex:1;" onclick="closeSettingsModal(); document.getElementById('importAllBtn').click();">
+                        <span class="icon icon-download"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span> Import Data
+                    </button>
+                </div>
+            </div>
+
+            <!-- Activity Thresholds Section -->
+            <div class="settings-section">
+                <div class="settings-section-title">Activity Thresholds</div>
+                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+                    Set when customer activity turns orange (warning) or red (overdue) based on days since last meeting.
+                </div>
+                <div class="settings-row">
+                    <span style="display:flex; align-items:center; gap:0.4rem;">
+                        <span style="width:10px;height:10px;border-radius:50%;background:#f59e0b;display:inline-block;"></span>
+                        Warning after
+                    </span>
+                    <div style="display:flex; align-items:center; gap:0.35rem;">
+                        <input type="number" class="form-input" id="settingsWarningDays" min="1" max="365" value="14" style="width:60px; padding:0.3rem 0.5rem; font-size:0.85rem; text-align:center;" onchange="updateActivityThresholds()">
+                        <span style="font-size:0.8rem; color:var(--text-secondary);">days</span>
+                    </div>
+                </div>
+                <div class="settings-row">
+                    <span style="display:flex; align-items:center; gap:0.4rem;">
+                        <span style="width:10px;height:10px;border-radius:50%;background:#ef4444;display:inline-block;"></span>
+                        Overdue after
+                    </span>
+                    <div style="display:flex; align-items:center; gap:0.35rem;">
+                        <input type="number" class="form-input" id="settingsOverdueDays" min="1" max="365" value="30" style="width:60px; padding:0.3rem 0.5rem; font-size:0.85rem; text-align:center;" onchange="updateActivityThresholds()">
+                        <span style="font-size:0.8rem; color:var(--text-secondary);">days</span>
+                    </div>
+                </div>
+                <div class="settings-row" style="margin-top: 0.5rem; border-top: 1px solid var(--border); padding-top: 0.75rem;">
+                    <span>Show color indicators for meetings</span>
+                    <label class="settings-toggle">
+                        <input type="checkbox" id="settingsColorMeetings" checked onchange="updateActivityThresholds()">
+                        <span class="settings-toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="settings-row">
+                    <span>Show color indicators for calls</span>
+                    <label class="settings-toggle">
+                        <input type="checkbox" id="settingsColorCalls" checked onchange="updateActivityThresholds()">
+                        <span class="settings-toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="settings-section" style="border-color: var(--danger);">
+                <div class="settings-section-title" style="color: var(--danger);">Danger Zone</div>
+                <div class="settings-row">
+                    <button class="btn btn-danger" style="width:100%;" onclick="closeSettingsModal(); confirmDeleteAccount();">Delete Account</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Context Menu -->
+    <div class="ctx-menu" id="ctxMenu">
+        <div class="ctx-menu-brand">Cnotes</div>
+        <div class="ctx-menu-divider"></div>
+        <div class="ctx-menu-item" id="ctxHome" onclick="ctxAction('home')">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+            Dashboard
+        </div>
+        <div class="ctx-menu-item" id="ctxNewMeeting" onclick="ctxAction('meeting')">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+            New Meeting
+        </div>
+        <div class="ctx-menu-item" id="ctxCustomers" onclick="ctxAction('customers')">
+            + Customers
+        </div>
+        <div class="ctx-menu-item" id="ctxTasks" onclick="ctxAction('tasks')">
+            + Tasks
+        </div>
+        <div class="ctx-menu-divider"></div>
+        <div class="ctx-menu-item" id="ctxTheme" onclick="ctxAction('theme')">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span>
+            Toggle Dark Mode
+        </div>
+    </div>
+
+    <script src="static/js/app.js"></script>
+</body>
+<script src="static/js/stripe.js"></script>
+</html>
